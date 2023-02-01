@@ -1180,11 +1180,11 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Oncoplot-like figure detailing treatment resistances.")
     parser.add_argument('--cohort', type=str, help='Names of the cohort.', default="prism")
     parser.add_argument('--alterations', type=str, help='Path to table of alterations.',
-                default="../../results/treatment_resistances/annotations/aggregated_alterations_prism_all_more.tsv")
+                default="../../../results/treatment_resistances/annotations/aggregated_alterations_prism_all_more.tsv")
     parser.add_argument('--drug_table', type=str, help='Path to table of drugs.',
-                        default="../../data/resources/drug_tables/Table_Drugs_v7.xlsx")
+                        default="../../../data/resources/drug_tables/Table_Drugs_v7.xlsx")
     parser.add_argument('--drug_rules', type=str, help='Path to rules for grouping of drugs.',
-                        default="../../data/resources/drug_tables/Table_Drugs_Groups_Oncoplot_29072022.xlsx")
+                        default="../../../data/resources/drug_tables/Table_Drugs_Groups_Oncoplot_29072022.xlsx")
     parser.add_argument('--tumor_type', type=str, default="PRAD", help='Selection of a subset of the cohort.')
     parser.add_argument('--level', type=str, default="Drugs",
                         help='Chooose between "Classes" and "Drugs"')
@@ -1197,9 +1197,9 @@ if __name__ == "__main__":
         help="Only alterations seen at least this number of times will have a separate stack, other alterations are" + \
               " collapsed to gene name")
     parser.add_argument('--output_table', type=str,  help='Paths to output oncoplot-like.',
-                        default="../../results/treatment_resistances/plots/comuts/table_PRAD_Drugs.xlsx")
+                        default="../../../results/treatment_resistances/plots/comuts/table_PRAD_Drugs.xlsx")
     parser.add_argument('--output_plot', type=str,  help='Paths to output oncoplot-like.',
-                        default="../../results/treatment_resistances/plots/comuts/oncoplot_PRAD_Drugs.pdf")
+                        default="../../../results/treatment_resistances/plots/comuts/oncoplot_PRAD_Drugs.pdf")
     parser.add_argument('--output_plot_paper', type=str,  help='Paths to output oncoplot-like.',
                         default=None)
     args = parser.parse_args()
