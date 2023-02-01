@@ -1,0 +1,57 @@
+setup:
+  MetaPrism: ../../../common/envs/MetaPrism.yaml
+
+data:
+  cohorts:
+    - prism
+    - met500
+    - tcga
+
+  mutations:
+    ann:
+      prism: ../../../data/prism/wes/germline_maf/germline_calls_pathogenic.maf.gz
+      met500: ../../../data/met500/wes/germline_maf/germline_calls_pathogenic.maf.gz
+      tcga: ../../../data/tcga/wes/germline_maf/germline_calls_pathogenic.maf.gz
+
+selection:
+  cohorts:
+    - tcga
+    - prism
+    - met500
+  col_tt: "Project_TCGA_More"
+  sample_types: 
+    - DNA_N
+  algos:
+    DNA_N:
+      - germline_maf
+  tt_keep_min_sizes:
+    plotting: 10
+  tt_keeps:
+    plotting: null
+  tt_drops:
+    plotting:
+      - Not_TCGA
+      - Unknown_Primary
+      - "N/A"
+
+
+heatmap:
+  selection_muts:
+    - annotated 
+
+  min_counts_evt:
+    met500: 3
+    prism: 3
+    tcga: 20
+
+  height_one: 16
+  width_one: 44
+
+
+count:
+  selection_muts:
+    - annotated 
+
+filepaths:
+  base: ../../../data
+  yaml: ../../../data/organisation/DATA_ORGANISATION.yaml

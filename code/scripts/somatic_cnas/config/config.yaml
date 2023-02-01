@@ -1,0 +1,86 @@
+setup:
+  MetaPrism: ../../../common/envs/MetaPrism.yaml
+
+data:
+  cohorts:
+    - prism
+    - met500
+    - tcga
+
+  bio:
+    prism: ../../../data/prism/clinical/curated/bio_prism_in_design_curated.tsv
+    met500: ../../../data/met500/clinical/curated/bio_met500_in_design_curated.tsv
+    tcga: ../../../data/tcga/clinical/curated/bio_tcga_in_design_curated.tsv
+
+  cln:
+    prism: ../../../data/prism/clinical/curated/cln_prism_in_design_curated.tsv
+    met500: ../../../data/met500/clinical/curated/cln_met500_in_design_curated.tsv
+    tcga: ../../../data/tcga/clinical/curated/cln_tcga_in_design_curated.tsv
+
+  cna:
+    oncokb_civic:
+      prism: ../../../data/prism/wes/somatic_cna/somatic_calls_union_ann.tsv.gz
+      met500: ../../../data/met500/wes/somatic_cna/somatic_calls_union_ann.tsv.gz
+      tcga: ../../../data/tcga/wes/somatic_cna/somatic_calls_union_ann.tsv.gz
+
+  genes:
+    oncokb_cosmic: ../../../data/resources/curated/cancer_genes_curated.tsv
+
+
+selection:
+    cohorts:
+      - prism
+      - met500
+      - tcga
+    col_tt: "Project_TCGA_More"
+    sample_types: 
+      - DNA_T__DNA_N
+    algos:
+      DNA_T__DNA_N:
+        - somatic_cna
+        - somatic_ppy
+    tt_keep_min_sizes:
+      all_cohort: 1
+      selections: 10
+    tt_keeps:
+      all_cohort: null
+      selections: null
+    tt_drops:
+      all_cohort: null
+      selections:
+        - Not_TCGA
+        - Unknown_Primary
+        - "N/A"
+
+count:
+  cna_modes:
+    - oncokb_civic
+
+  pathways:
+    - sanchez_vega
+    - mutsigdb_hallmarks
+    - cpad_kegg
+
+  genes:
+    - oncokb_cosmic
+
+
+
+heatmap_chr_arm:
+  min_counts_evt:
+    gains:
+      prism: 1
+      met500: 1
+      tcga: 1
+    losses:
+      prism: 1
+      met500: 1
+      tcga: 1
+
+  height_one: 15
+  width_one: 35
+
+
+filepaths:
+  base: ../../../data
+  yaml: ../../../data/organisation/DATA_ORGANISATION.yaml

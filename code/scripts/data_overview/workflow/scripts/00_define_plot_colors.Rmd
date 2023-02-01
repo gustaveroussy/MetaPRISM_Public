@@ -1,0 +1,331 @@
+---
+title: "META-PRISM: Define colors common to all plots"
+author: "Yoann Pradat"
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+link-citations: true
+output:
+  bookdown::html_document2:
+    theme: cosmo
+    toc: true
+    toc_float: true
+    code_folding: show
+  rmdformats::material:
+    highlight: kate
+---
+
+<style>
+body {
+text-align: justify}
+</style>
+
+```{r set-options, echo=FALSE, cache=FALSE}
+options(width=120)
+```
+
+# Technical setup 
+
+## Libraries
+
+R libraries.
+
+```{r R libraries, message=F}
+# using python in R
+library(reticulate)
+
+# save
+library(xlsx)
+
+# in-house packages
+library(rprism)
+library(rprismtools)
+```
+
+Python libraries.
+
+```{python python libraries}
+import pandas as pd
+import numpy as np
+from pyprism.data import load_cln, load_bio
+
+import matplotlib
+import matplotlib.cm as cm
+```
+
+## Functions
+
+R functions
+
+```{r R functions}
+add_colors_to_table <- function(colors, name, dfs=NULL){
+  if (is.null(dfs)){
+    dfs <- list()
+  }
+  
+  if (name %in% names(dfs)){
+    n <- nrow(dfs[[name]])
+    df <- data.frame(Name=names(colors), Color=unlist(colors), row.names=seq(n+1, n+length(colors)))
+    dfs[[name]] <- rbind(dfs[[name]], df)
+  } else {
+    df <- data.frame(Name=names(colors), Color=unlist(colors), row.names=seq(1, length(colors)))
+    dfs[[name]] <- df
+  }
+
+  dfs
+}
+```
+
+
+Python functions
+
+```{python python functions}
+def get_labels2colors(labels_unique, sort=False, cmap_name=None, palette=None, alpha=None, colors_avoid=[]):
+    labels2colors = dict()
+
+    if palette is None and cmap_name is None:
+        raise ValueError("Specify either palette or cmap_name")
+    elif palette is None:
+        cmap = cm.get_cmap(cmap_name)
+        palette = [cmap(i) for i in range(cmap.N)]
+
+    if sort:
+        labels_unique = sorted(labels_unique)
+
+    i = 0
+    for label in labels_unique:
+        color = palette[i % len(palette)]
+        while color in colors_avoid:
+            i = i+1
+            color = palette[i % len(palette)]
+        color = matplotlib.colors.to_hex(color)
+        if alpha is not None:
+            op = re.sub("0x", "", hex(round(alpha*255)))
+            if len(op)==1:
+                op = "0" + op
+            color = color + op
+        labels2colors[label] = color.upper()
+        i = i+1
+
+    return labels2colors
+```
+
+```{r init colors list}
+dfs_colors <- list()
+```
+
+## Parameters
+
+```{r parameters}
+folder_results <- "../../../../results/data_overview/colors"
+if (!dir.exists(folder_results)){
+  dir.create(folder_results, showWarnings=F, recursive=T)
+}
+```
+
+
+# Global colors
+
+Let us first define colors that will serve in the graphics parameters of multiple analyses. These include the colors for
+representing each of the pancancer cohorts (MET500, PRISM, TCGA), the colors for representing tumor types, the colors
+for representing biopsy sites, etc. Once the colors are defined, they are depicted in this notebook and saved in a
+common excel worksheet.
+
+Here are the colors used for
+
+```{r colors cohorts, fig.width=6, fig.height=1, fig.align="center"}
+cohorts2colors <- list(prism="#E5383B", met500="#90BE6D", tcga="#577590")
+cohorts2colors <- cohorts2colors[sort(names(cohorts2colors))]
+dfs_colors <- add_colors_to_table(cohorts2colors, name="Global", dfs=dfs_colors)
+rect_plot_colors(line=1, colors=cohorts2colors)
+```
+
+```{r colors bicohorts, fig.width=6, fig.height=1.5, fig.align="center"}
+bicohorts2colors <- list(prism_clear="#F6A38E", prism_dark="#D03711",
+                         met500_clear="#74C69D", met500_dark="#1B4332",
+                         tcga_clear="#48cae4", tcga_dark="#023E8A")
+bicohorts2colors <- bicohorts2colors[sort(names(bicohorts2colors))]
+dfs_colors <- add_colors_to_table(bicohorts2colors, name="Global", dfs=dfs_colors)
+rect_plot_colors(line=3, colors=bicohorts2colors)
+```
+
+# Clinical fields colors
+
+```{python load clinical}
+cohorts = ["prism", "met500", "tcga"]
+dfs_cln = {cohort: load_cln(study=cohort, mode="in_design") for cohort in cohorts}
+
+# fill na
+cols_fillna = {"Primary_Site", "Project_TCGA", "Project_TCGA_More", "Histological_Type"}
+
+for name, df in dfs_cln.items():
+    cols_df = set(df.columns)
+    for col in cols_fillna.intersection(cols_df):
+        df[col] = df[col].fillna("N/A").astype(str)
+```
+
+```{python clinical colors}
+def get_dict_mode_xy(df, x, y):
+    s_mode = df.dropna(subset=[x,y]).groupby(x)[y].agg(lambda x: pd.Series.mode(x).iat[0])
+    df_mode = s_mode.to_frame(y).reset_index()
+    return {r[x]:r[y] for _, r in df_mode.iterrows()}
+
+# Project_TCGA colors
+PT_unique = set().union(*[set(df["Project_TCGA"]) for df in dfs_cln.values()])
+PT2colors = get_labels2colors(labels_unique=PT_unique, sort=True, cmap_name="tab20")
+PT2colors["LUSC"] = "#DBDB8D"
+PT2colors["Unknown_Primary"] = "#D3D3D3"
+
+# Project_TCGA_More colors
+PTM_unique = set().union(*[set(df["Project_TCGA_More"]) for cohort, df in dfs_cln.items() if cohort!="tcga"])
+PTM_unique.remove("MISC - Not_TCGA")
+
+PTM2colors_ntcga = {"HNAC - Not_TCGA": PT2colors["HNSC"], "LUNE - Not_TCGA": PT2colors["LUSC"],
+                    "SARC - Not_TCGA": PT2colors["SARC"], "BLCA - Not_TCGA": PT2colors["BLCA"],
+                    "THCA - Not_TCGA": PT2colors["THCA"], "MISC - Not_TCGA": PT2colors["Not_TCGA"],
+                    "ANUS - Not_TCGA": "#EE6C4D", "SI - Not_TCGA": "#FCBF49"}
+PTM2colors = {**PT2colors, **PTM2colors_ntcga}
+
+# Primary_Site
+x = "Primary_Site"
+y = "Project_TCGA_More"
+PS_unique = set().union(*[set(df[x]) for df in dfs_cln.values()])
+PS2PTM = get_dict_mode_xy(df=pd.concat([df[[x,y]] for df in dfs_cln.values()]), x=x, y=y)
+PS2colors = {k: PTM2colors[v] for k,v in PS2PTM.items()}
+
+# Histological_Type
+x = "Histological_Type"
+HT_unique =set().union(*[set(df["Histological_Type"].dropna()) for df in dfs_cln.values()])
+HT2colors = get_labels2colors(labels_unique=HT_unique, sort=True, cmap_name="tab20")
+```
+
+Display colors for `Project_TCGA`.
+
+```{r display PT2colors, fig.width=10, fig.height=8, fig.align="center"}
+PT2colors <- py$PT2colors
+PT2colors <- PT2colors[sort(names(PT2colors))]
+dfs_colors <- add_colors_to_table(PT2colors, name="Project_TCGA", dfs=dfs_colors)
+rect_plot_colors(line=10, colors=PT2colors)
+```
+
+Display colors for `Project_TCGA_More`.
+
+```{r display PTM2colors, fig.width=10, fig.height=8, fig.align="center"}
+PTM2colors <- py$PTM2colors
+PTM2colors <- PTM2colors[sort(names(PTM2colors))]
+dfs_colors <- add_colors_to_table(PTM2colors, name="Project_TCGA_More", dfs=dfs_colors)
+rect_plot_colors(line=10, colors=PTM2colors)
+```
+
+Display colors for `Primary_Site`.
+
+```{r display PS2colors, fig.width=10, fig.height=10, fig.align="center"}
+PS2colors <- py$PS2colors
+PS2colors <- PS2colors[sort(names(PS2colors))]
+dfs_colors <- add_colors_to_table(PS2colors, name="Primary_Site", dfs=dfs_colors)
+rect_plot_colors(line=20, colors=PS2colors, cex=0.5)
+```
+
+# Biopsies fields colors
+
+```{python load dfs_bio}
+cohorts = ["prism", "met500", "tcga"]
+dfs_bio = {cohort: load_bio(study=cohort, mode="in_design") for cohort in cohorts}
+
+# Biopsy_Site colors
+BS_unique = set().union(*[set(df["Biopsy_Site"]) for df in dfs_bio.values()])
+BS_in_PS = BS_unique.intersection(PS_unique)
+BS_not_in_PS = BS_unique.difference(PS_unique)
+BS2colors = {**{x: PS2colors[x] for x in BS_in_PS},
+              **get_labels2colors(labels_unique=BS_not_in_PS,
+                                  colors_avoid=[PS2colors[x] for x in BS_in_PS],
+                                  cmap_name="tab20")}
+BS2colors["Lymph nodes"] = "#AEC7E8"
+```
+
+Display colors for `Biopsy_Site`.
+
+```{r display BS2colors, fig.width=10, fig.height=14, fig.align="center"}
+BS2colors <- py$BS2colors
+BS2colors <- BS2colors[sort(names(BS2colors))]
+dfs_colors <- add_colors_to_table(BS2colors, name="Biopsy_Site", dfs=dfs_colors)
+rect_plot_colors(line=25, colors=BS2colors, cex=0.5)
+```
+
+Let us save the colors we just defined.
+
+# Signatures colors
+
+Colors for plots related to mutational signatures analyses.
+
+```{r mut change colors deconstructSigs, fig.height=0.5, fig.width=6, fig.align="center"}
+# deconstructSigs colors
+mut_change2colors <- lapply(list('C>A'="#999999", 
+                                 'C>G'="#E69F00", 
+                                 'C>T'="#56B4E9", 
+                                 'T>A'="#009E73", 
+                                 'T>C'="#F0E442", 
+                                 'T>G'="#0072B2"),
+                            function(x) grDevices::adjustcolor(x, alpha=0.8))
+
+rect_plot_colors(line=1, colors=mut_change2colors)
+```
+
+
+```{r mut change colors maftools, fig.height=0.5, fig.width=6, fig.align="center"}
+# maftools colors
+mut_change2colors <- lapply(list('C>T'='coral4',
+                                 'C>G'='lightcyan4',
+                                 'C>A'='cornflowerblue',
+                                 'T>A'='lightsalmon1',
+                                 'T>C'='forestgreen',
+                                 'T>G'='deeppink3'),
+                            function(x) grDevices::adjustcolor(x, alpha=0.8))
+
+mut_change2colors <- mut_change2colors[sort(names(mut_change2colors))]
+dfs_colors <- add_colors_to_table(mut_change2colors, name="Signatures", dfs=dfs_colors)
+rect_plot_colors(line=1, colors=mut_change2colors)
+```
+
+
+```{r variants colors, echo=T, fig.height=1, fig.width=10, fig.align="center", fig.cap="Variants colors"}
+#  Variant classification colors
+#  Used in 
+#  - maftools::plotmafSummary
+#  - maftools::oncoplot
+VC_ensembl2colors  <- lapply(list(missense_variant = '#33a02c',
+                          stop_gained      = '#e31a1c',
+                          frameshift_del   = '#1f78b4',
+                          frameshift_ins   = '#ff7f00',
+                          hotspot          = '#6a3d9a',
+                          inframe_ins      = '#a6cee3',
+                          inframe_del      = '#fdbf6f',
+                          start_lost       = '#b2df8a',
+                          stop_lost        = '#cab2d6'),
+                     function(x) adjustcolor(x, alpha=0.8))
+
+VC_ensembl2colors <- VC_ensembl2colors[sort(names(VC_ensembl2colors))]
+dfs_colors <- add_colors_to_table(VC_ensembl2colors, name="VC_ensembl", dfs=dfs_colors)
+rect_plot_colors(line=2, colors=VC_ensembl2colors)
+```
+
+# Save in excel workbook
+
+```{r save colors, include=T}
+filepath <- file.path(folder_results, "colors_template.xlsx")
+wb <- createWorkbook(type="xlsx")
+
+for (name in names(dfs_colors)){
+  sheet <- createSheet(wb, sheetName=name)
+  setColumnWidth(sheet, colIndex=1, colWidth=35)
+  addDataFrame(dfs_colors[[name]], sheet, startRow=1, startColumn=1, row.names=F)
+}
+
+
+saveWorkbook(wb, filepath)
+cat(paste("Excel workbook with colors saved at", filepath, "\n"))
+```
+
+# Session Info
+
+```{r r config}
+sessionInfo()
+```

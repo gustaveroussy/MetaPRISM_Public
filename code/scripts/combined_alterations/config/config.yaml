@@ -1,0 +1,236 @@
+setup:
+  MetaPrism: ../../../common/envs/MetaPrism.yaml
+
+data:
+  cohorts:
+    - prism
+    - met500
+    - tcga
+
+  bio:
+    met500: ../../../data/met500/clinical/curated/bio_met500_in_design_curated.tsv
+    prism: ../../../data/prism/clinical/curated/bio_prism_in_design_curated.tsv
+    tcga: ../../../data/tcga/clinical/curated/bio_tcga_in_design_curated.tsv
+
+  cln:
+    met500: ../../../data/met500/clinical/curated/cln_met500_in_design_curated.tsv
+    prism: ../../../data/prism/clinical/curated/cln_prism_in_design_curated.tsv
+    tcga: ../../../data/tcga/clinical/curated/cln_tcga_in_design_curated.tsv
+
+  cna:
+    met500: ../../../data/met500/wes/somatic_cna/somatic_calls_union_ann.tsv.gz
+    prism: ../../../data/prism/wes/somatic_cna/somatic_calls_union_ann.tsv.gz
+    tcga: ../../../data/tcga/wes/somatic_cna/somatic_calls_union_ann.tsv.gz
+
+  fus:
+    met500: ../../../data/met500/rna/fusions/met500_annotated_filtered_union_ann.tsv.gz
+    prism: ../../../data/prism/rna/fusions/prism_annotated_filtered_union_ann.tsv.gz
+    tcga: ../../../data/tcga/rna/fusions/tcga_annotated_filtered_union_ann.tsv.gz
+
+  msi:
+    met500: ../../../data/met500/wes/somatic_msi/somatic_msi.tsv
+    prism: ../../../data/prism/wes/somatic_msi/somatic_msi.tsv
+    tcga: ../../../data/tcga/wes/somatic_msi/somatic_msi.tsv
+
+  mut:
+    met500: ../../../data/met500/wes/somatic_maf/somatic_calls_union_ann.maf.gz
+    prism: ../../../data/prism/wes/somatic_maf/somatic_calls_union_ann.maf.gz
+    tcga: ../../../data/tcga/wes/somatic_maf/somatic_calls_union_ann.maf.gz
+
+  tmb:
+    met500: ../../../data/met500/wes/summary/somatic_maf.tsv
+    prism: ../../../data/prism/wes/summary/somatic_maf.tsv
+    tcga: ../../../data/tcga/wes/summary/somatic_maf.tsv
+
+
+  exp_arv7:
+    met500: ../../../results/rna_general/arv7/arv7_analysis_met500.tsv
+    prism: ../../../results/rna_general/arv7/arv7_analysis_prism.tsv
+    tcga: ../../../results/rna_general/arv7/arv7_analysis_tcga.tsv
+
+  resources:
+    drug: ../../../data/resources/drug_tables/Table_Drugs_v7.xlsx
+    target_bed: ../../../data/resources/target_files/all_targets_intersect_padded_10n.bed
+    cancer_genes: ../../../data/resources/curated/cancer_genes_curated.tsv
+
+
+selection:
+  cohorts:
+    - met500
+    - prism
+    - tcga
+  col_tt: "Project_TCGA_More"
+  sample_types: 
+    sankey: null
+    heatmap_all:
+      - DNA_T__DNA_N
+      - RNA_T
+    heatmap_dna:
+      - DNA_T__DNA_N
+  algos:
+    DNA_T__DNA_N:
+      - somatic_maf
+      - somatic_cna
+    RNA_T:
+      - fusions
+  tt_keep_min_sizes:
+    sankey: 1
+    heatmap_all: 10
+    heatmap_dna: 10
+  tt_keeps: null
+  tt_drops:
+    sankey: null
+    heatmap_all:
+      - MISC
+      - Unknown_Primary
+      - "N/A"
+    heatmap_dna:
+      - MISC
+      - Unknown_Primary
+      - "N/A"
+
+
+barplots_recurrence:
+  cohorts:
+    - prism
+    - met500
+    - tcga
+
+  tumor_types:
+    - All
+    - BLCA
+    - BRCA
+    - LUAD
+    - PRAD
+
+  recurrence_threshold:
+    prism:
+      All: 8
+      BLCA: 4
+      BRCA: 4
+      LUAD: 6
+      PRAD: 4
+    met500:
+      All: 8
+      BLCA: 4
+      BRCA: 4
+      LUAD: 4
+      PRAD: 4
+    tcga:
+      All: 40
+      BLCA: 20
+      BRCA: 20
+      LUAD: 30
+      PRAD: 20
+
+
+cooccurrence:
+  cohorts:
+    - prism
+
+  tumor_types:
+    - All
+    - BLCA
+    - BRCA
+    - LUAD
+    - PRAD
+
+  recurrence_threshold:
+    prism:
+      All: 20
+      BLCA: 6
+      BRCA: 6
+      LUAD: 10
+      PRAD: 6
+
+  genes_keep_separate_events:
+    All: null
+    BLCA: null
+    BRCA: null
+    PRAD:
+      - PTEN
+    LUAD: null
+
+heatmap_all:
+  sensitivity:
+    width: 750
+    height: 930
+
+  resistance:
+    width: 800
+    height: 700
+
+
+heatmap_dna:
+  min_counts_evt:
+    oncogenes:
+      prism: 10
+      met500: 7
+      tcga: 90
+    tumorsuppressors:
+      prism: 16
+      met500: 11
+      tcga: 145
+
+  height_one: 16
+  width_one: 45
+
+
+count:
+  pathways:
+    sanchez_vega: ../../../data/resources/pathways/data/sanchez-vega_cell_2018_curated.tsv
+    msigdb_hallmarks: ../../../data/resources/pathways/data/h.all.v7.4.symbols_curated.tsv
+    cpad_kegg: ../../../data/resources/pathways/data/CPAD-data_kegg_pathways_genes_curated.tsv 
+
+
+oncoplot:
+  tumor_types:
+    - ACC
+    - BLCA
+    - BRCA
+    - COAD
+    - CHOL
+    - HNSC
+    - LUAD
+    - LUSC
+    - PAAD
+    - PRAD
+  vc_selection_list:
+    DNA_T:
+      - Frame_Shift_Del
+      - Frame_Shift_Ins
+      - Splice_Site
+      - Translation_Start_Site
+      - Nonsense_Mutation
+      - Nonstop_Mutation
+      - In_Frame_Del
+      - In_Frame_Ins
+      - Missense_Mutation
+      - Start_Codon_Del
+      - Start_Codon_SNP
+      - Stop_Codon_Del
+      - Stop_Codon_Ins
+      - Amp
+      - Del
+      - "MSI High"
+      - "TMB High"
+    RNA_T:
+      - Fusion
+      - Exp
+  vc_colors: Custom
+  genes_selection_list:
+    - min_freq
+  genes_selection_min_freq:
+    prism: 0.01
+    met500: 0.01
+    tcga: 0.005
+  algorithms:
+    DNA_T: WES_somatic_maf
+    RNA_T:
+      - RNA_fusions
+      - RNA_kallisto-tximport
+
+
+filepaths:
+  base: ../../../data
+  yaml: ../../../data/organisation/DATA_ORGANISATION.yaml

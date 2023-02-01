@@ -1,0 +1,54 @@
+# @created: 30 Jun 2021
+# @modified: 29 Dec 2022
+# @uthor: Yoann Pradat
+#
+# This pipeline runs an exhaustive analysis of somatic mutations in tumor samples from all three cohorts
+# META-PRISM, MET500, and TCGA.
+
+include: "rules/common.smk"
+
+##### Target rules #####
+
+rule all:
+    input:
+        expand("%s/selection/selection_samples_{cohort}.tsv" % R_FOLDER, cohort=config["selection"]["cohorts"]),
+        #### MUTPANNING ####
+        expand("%s/mutpanning_{cohort}_{tumor_type}.done" % L_FOLDER,
+            cohort=config["data"]["cohorts"], tumor_type=config["mutpanning"]["tumor_types"]),
+        "%s/mutpanning/table_extra_mutpanning.pdf" % R_FOLDER,
+        #### BURDEN PLOTS ####
+        expand("%s/burden/cumulative_scatter_plot_{tt_mode}_tumor_types.pdf" % R_FOLDER,
+            tt_mode=["prism","all"]),
+        #### BARPLOTS ####
+        expand("%s/recurrence/barplots_{selection}_mutations_cby_{color_by}_gby_{group_by}_in_{tumor_type}_of_{cohort}.pdf" \
+            % R_FOLDER, selection=config["recurrence"]["selections"], color_by=config["recurrence"]["color_by"],
+            group_by=config["recurrence"]["group_by"], tumor_type=config["recurrence"]["tumor_types"],
+            cohort=["prism", "met500", "tcga"]),
+        #### COUNT TABLES ####
+        expand("%s/count/count_by_gene_{gene}_DNA_{selection}_{cohort}.tsv" % R_FOLDER,
+            selection=["non_synonymous"], gene=config["count"]["genes"], cohort=["prism", "tcga"]),
+        expand("%s/count/count_by_pathway_{pathway}_DNA_{selection}_{cohort}.tsv" % R_FOLDER,
+            selection=["non_synonymous"], pathway=config["count"]["pathways"], cohort=["prism", "tcga"]),
+        expand("%s/count/count_total_DNA_{selection}_{cohort}.tsv" % R_FOLDER,
+            selection=["non_synonymous", "all"], cohort=["prism", "tcga"]),
+        #### FIGURES PAPER ####
+        "%s/F2a.svg" % F_FOLDER,
+        "%s/FS12.pdf" % F_FOLDER
+
+
+##### Modules #####
+
+include: "../../common/rules/setup.smk"
+include: "../../common/rules/selection.smk"
+include: "rules/mutpanning.smk"
+include: "rules/oncoplot.smk"
+include: "rules/plotting.smk"
+include: "rules/count.smk"
+
+##### End messages #####
+
+onsuccess:
+    print("Workflow finished, no error")
+
+onerror:
+    print("An error occurred")

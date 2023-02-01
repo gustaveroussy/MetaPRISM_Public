@@ -1,0 +1,36 @@
+# @created: 30 Jun 2021
+# @modified: 02 Jan 2023
+# @uthor: Yoann Pradat
+#
+# This pipeline analyzes pathogenic germline mutations in META-PRISM, MET500, and TCGA.
+
+include: "rules/common.smk"
+
+##### Target rules #####
+
+rule all:
+    input:
+        "%s/selection/selection_tumor_types.tsv" % R_FOLDER,
+        expand("%s/selection/selection_samples_{cohort}.tsv" % R_FOLDER, cohort=config["data"]["cohorts"]),
+        #### PAPER FIGURES ####
+        "%s/F3a_germline.svg" % F_FOLDER,
+        "%s/F3c.svg" % F_FOLDER,
+        "%s/F3d_top.svg" % F_FOLDER,
+        "%s/F3d_bot.svg" % F_FOLDER,
+        "%s/F3e.svg" % F_FOLDER
+
+
+##### Modules #####
+
+include: "../../common/rules/setup.smk"
+include: "../../common/rules/selection.smk"
+include: "rules/plotting.smk"
+include: "rules/count.smk"
+
+##### End messages #####
+
+onsuccess:
+    print("Workflow finished, no error")
+
+onerror:
+    print("An error occurred")

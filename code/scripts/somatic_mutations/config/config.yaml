@@ -1,0 +1,178 @@
+setup:
+  MetaPrism: ../../../common/envs/MetaPrism.yaml
+
+data:
+  cohorts:
+    - prism
+    - met500
+    - tcga
+
+  bio:
+    prism: ../../../data/prism/clinical/curated/bio_prism_in_design_curated.tsv
+    met500: ../../../data/met500/clinical/curated/bio_met500_in_design_curated.tsv
+    tcga: ../../../data/tcga/clinical/curated/bio_tcga_in_design_curated.tsv
+
+  cln:
+    prism: ../../../data/prism/clinical/curated/cln_prism_in_design_curated.tsv
+    met500: ../../../data/met500/clinical/curated/cln_met500_in_design_curated.tsv
+    tcga: ../../../data/tcga/clinical/curated/cln_tcga_in_design_curated.tsv
+
+  mut:
+    all:
+      prism: ../../../data/prism/wes/somatic_maf/somatic_calls.maf.gz
+      met500: ../../../data/met500/wes/somatic_maf/somatic_calls.maf.gz
+      tcga: ../../../data/tcga/wes/somatic_maf/somatic_calls.maf.gz
+    ann:
+      prism: ../../../data/prism/wes/somatic_maf/somatic_calls_union_ann.maf.gz
+      met500: ../../../data/met500/wes/somatic_maf/somatic_calls_union_ann.maf.gz
+      tcga: ../../../data/tcga/wes/somatic_maf/somatic_calls_union_ann.maf.gz
+    sum:
+      prism: ../../../data/prism/wes/summary/somatic_maf.tsv
+      met500: ../../../data/met500/wes/summary/somatic_maf.tsv
+      tcga: ../../../data/tcga/wes/summary/somatic_maf.tsv
+    sam:
+      prism: ../../../data/prism/wes/somatic_maf/sample_list.tsv
+      met500: ../../../data/met500/wes/somatic_maf/sample_list.tsv
+      tcga: ../../../data/tcga/wes/somatic_maf/sample_list.tsv
+
+  target_bed: ../../../data/resources/target_files/all_targets_intersect_padded_10n.bed
+
+  pathways:
+    sanchez_vega: ../../../data/resources/pathways/data/sanchez-vega_cell_2018_curated.tsv
+    msigdb_hallmarks: ../../../data/resources/pathways/data/h.all.v7.4.symbols_curated.tsv
+    cpad_kegg: ../../../data/resources/pathways/data/CPAD-data_kegg_pathways_genes_curated.tsv 
+
+  genes:
+    oncokb_cosmic: ../../../data/resources/curated/cancer_genes_curated.tsv
+
+selection:
+  cohorts:
+    - prism
+    - met500
+    - tcga
+  col_tt: "Project_TCGA_More"
+  sample_types: 
+    - DNA_T__DNA_N
+  algos:
+    DNA_T__DNA_N:
+      - somatic_maf
+  tt_keep_min_sizes:
+    plotting_sel: 10
+    plotting_all: null
+    mutpanning: 40
+  tt_keeps:
+    plotting_sel: null
+    plotting_all: null
+    mutpanning: null
+  tt_drops:
+    plotting_sel:
+      - Not_TCGA
+      - Unknown_Primary
+      - "N/A"
+    plotting_all:
+      - Not_TCGA
+      - Unknown_Primary
+      - "N/A"
+    mutpanning:
+      - Not_TCGA
+      - Unknown_Primary
+      - "N/A"
+
+
+mutpanning:
+  app: external/MutPanningV2
+  hg19: resources/dietlein_2020/Hg19
+  pairs: resources/dietlein_2020/MutPanningGeneTumorPairs_fdr=0.25.csv
+
+  tumor_types:
+    - BLCA
+    - BRCA
+    - LUAD
+    - PAAD
+    - PRAD
+    - PanCancer
+
+oncoplot:
+  vc_selection_list:
+    - Frame_Shift_Del
+    - Frame_Shift_Ins
+    - Splice_Site
+    - Translation_Start_Site
+    - Nonsense_Mutation
+    - Nonstop_Mutation
+    - In_Frame_Del
+    - In_Frame_Ins
+    - Missense_Mutation
+    - Start_Codon_Del
+    - Start_Codon_SNP
+    - Stop_Codon_Del
+    - Stop_Codon_Ins
+  genes_selection_list:
+    - mutpanning_pairs
+    - mutpanning_run
+  vc_colors: Mutpan
+
+  tumor_types:
+    - BLCA
+    - BRCA
+    - LUAD
+    - PRAD
+
+count:
+  selections:
+    - all
+    - non_synonymous
+
+  pathways:
+    - sanchez_vega
+    - msigdb_hallmarks
+    - cpad_kegg
+
+  genes:
+    - oncokb_cosmic
+
+recurrence:
+  threshold:
+    mutations:
+      all:
+        prism: 5
+        met500: 5
+        tcga: 40
+      non_synonymous:
+        prism: 5
+        met500: 5
+        tcga: 40
+      annotated:
+        prism: 5
+        met500: 5
+        tcga: 40
+    genes:
+      all:
+        prism: 50
+        met500: 50
+        tcga: 400
+      non_synonymous:
+        prism: 50
+        met500: 50
+        tcga: 400
+      annotated:
+        prism: 10
+        met500: 10
+        tcga: 80
+
+  selections:
+    - annotated
+    - non_synonymous
+  group_by:
+    - mutations
+    - genes
+  color_by:
+    - Annotation_Status
+    - Variant_Classification_Custom
+  tumor_types:
+    - All
+
+
+filepaths:
+  base: ../../../data
+  yaml: ../../../data/organisation/DATA_ORGANISATION.yaml

@@ -1,0 +1,139 @@
+setup:
+  MetaPrism: ../../../common/envs/MetaPrism.yaml
+
+random_state: 123
+
+data:
+  cohorts:
+    - tcga
+    - prism
+    - met500
+
+selection:
+  cohorts:
+    - tcga
+    - prism
+    - met500
+  col_tt: "Project_TCGA_More"
+  sample_types:
+    - RNA_T
+  algos:
+    RNA_T:
+      - kallisto-tximport
+  tt_keep_min_sizes:
+    mfp_model: 10
+  tt_keeps: null
+  tt_drops:
+    mfp_model:
+      - "Not_TCGA"
+      - Unknown_Primary
+      - "N/A"
+      - SARC
+
+resources:
+  gene_tables:
+    gencode_v23: resources/ucsc_xena/Pan_TCGA/gencode_v23.tsv
+    gencode_v23_coding_no-mt_no-histones: resources/ucsc_xena/Pan_TCGA/gencode_v23_coding_no-mt_no-histones.tsv
+    gencode_v27: resources/data/gencode_v27.tsv
+    gencode_v27_coding_no-mt_no-histones: resources/data/gencode_v27_coding_no-mt_no-histones.tsv
+
+  hgnc: ../../../data/resources/hgnc/hgnc_all_symbols_03012022.tsv
+
+  prism:
+    gene_table: gencode_v27
+    gene_selection: gencode_v27_coding_no-mt_no-histones
+
+  met500:
+    gene_table: gencode_v27
+    gene_selection: gencode_v27_coding_no-mt_no-histones
+
+  tcga:
+    gene_table: gencode_v27
+    gene_selection: gencode_v27_coding_no-mt_no-histones
+
+  bagaev_2021:
+    gene_table: gencode_v23
+    gene_selection: gencode_v23_coding_no-mt_no-histones 
+    signatures: resources/bagaev_2021/Pan_TCGA/signatures.tsv
+    annotation: resources/bagaev_2021/Pan_TCGA/annotation.tsv
+
+  ucsc_xena:
+    gene_table: gencode_v23
+    gene_selection: gencode_v23_coding_no-mt_no-histones 
+    expression: resources/ucsc_xena/Pan_TCGA/tcga_target_no_normal_rsem_gene_tpm.gz
+
+signatures:
+  gene_signatures:
+    bagaev_2021: resources/bagaev_2021/signatures/gene_signatures.gmt
+  gsva_method: "ssgsea"
+  gsva_ssgsea_norm: false
+  gsva_tau: 0.25
+  mem_mb:
+    tcga: 48000
+    prism: 16000
+    met500: 16000
+
+mfp_models:
+  cohorts:
+      - tcga
+      - bagaev_2021
+
+  names:
+    - AdaBoostClassifier
+    - KNeighborsClassifier
+    - LogisticRegression
+    - RandomForestClassifier 
+    - SVC
+    - MetaAVotingClassifier
+
+  AdaBoostClassifier:
+    mem_mb_per_thread: 800
+    partition: cpu_med
+    threads: 20
+    time: "04:00:00"
+
+  KNeighborsClassifier:
+    mem_mb_per_thread: 2000
+    partition: cpu_med
+    threads: 20
+    time: "02:00:00"
+
+  LogisticRegression:
+    mem_mb_per_thread: 800
+    partition: cpu_med
+    threads: 20
+    time: "01:00:00"
+
+  RandomForestClassifier:
+    mem_mb_per_thread: 800
+    partition: cpu_med
+    threads: 20
+    time: "02:00:00"
+
+  SVC:
+    mem_mb_per_thread: 800
+    partition: cpu_med
+    threads: 20
+    time: "03:00:00"
+
+  MetaAVotingClassifier:
+    estimators:
+      - AdaBoostClassifier
+      - KNeighborsClassifier
+      - LogisticRegression
+      - RandomForestClassifier
+      - SVC
+    mem_mb_per_thread: 800
+    partition: cpu_med
+    threads: 20
+    time: "00:30:00"
+
+  grids_yaml: config/mfp_models_grids.yaml
+
+heatmap:
+  height_one: 12
+  width_one: 22
+
+filepaths:
+  base: ../../../data
+  yaml: ../../../data/organisation/DATA_ORGANISATION.yaml

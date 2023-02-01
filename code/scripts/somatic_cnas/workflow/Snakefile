@@ -1,0 +1,50 @@
+# @created: 06 Oct 2021
+# @modified: 02 Jan 2023
+# @uthor: Yoann Pradat
+#
+# This pipeline runs an exhaustive analysis of somatic copy number alterations on tumor samples from all three cohorts
+# META-PRISM, MET500, and TCGA.
+
+include: "rules/common.smk"
+
+##### Target rules #####
+
+rule all:
+    input:
+        "%s/selection/selection_tumor_types.tsv" % R_FOLDER,
+        expand("%s/selection/selection_samples_{cohort}.tsv" % R_FOLDER, cohort=config["data"]["cohorts"]),
+        #### COUNT TABLES ####
+        expand("%s/count/count_by_pathway_{cna_mode}_{pathway}_{cohort}.tsv" % R_FOLDER,
+            cna_mode=config["count"]["cna_modes"], pathway=config["count"]["pathways"],
+            cohort=config["data"]["cohorts"]),
+        expand("%s/count/count_by_gene_{cna_mode}_{gene}_{cohort}.tsv" % R_FOLDER,
+            cna_mode=config["count"]["cna_modes"], gene=config["count"]["genes"],
+            cohort=config["data"]["cohorts"]),
+        #### HEATMAPS ####
+        expand("%s/heatmap_chr_arm/heatmap_{alterations}.pdf" % R_FOLDER, alterations=["losses", "gains"]),
+        #### PAPER FIGURES ####
+        "%s/F2c.eps" % F_FOLDER,
+        "%s/F2d.eps" % F_FOLDER,
+        "%s/FS10_gains.pdf" % F_FOLDER,
+        "%s/FS10_losses.pdf" % F_FOLDER,
+        "%s/FS11a.pdf" % F_FOLDER,
+        "%s/FS11b.pdf" % F_FOLDER,
+        "%s/FS11c.pdf" % F_FOLDER,
+        "%s/FS11d.pdf" % F_FOLDER,
+        "%s/FS11d-e.pdf" % F_FOLDER
+
+##### Modules #####
+
+include: "../../common/rules/setup.smk"
+include: "../../common/rules/selection.smk"
+include: "rules/heatmap.smk"
+include: "rules/other_plots.smk"
+include: "rules/count.smk"
+
+##### End messages #####
+
+onsuccess:
+    print("Workflow finished, no error")
+
+onerror:
+    print("An error occurred")

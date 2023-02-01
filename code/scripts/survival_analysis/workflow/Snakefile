@@ -1,0 +1,60 @@
+# @created: 14 Oct 2021
+# @modified: 02 Jan 2023
+# @uthor: Yoann Pradat
+#
+# This pipeline performs a complete survival analysis of META-PRISM tumors.
+
+include: "rules/common.smk"
+
+##### Target rules #####
+
+rule all:
+    input:
+        # #### KM CURVES and OTHERS ####
+        ["%s/description/dist_%s.pdf" % (R_FOLDER, x) for x in ["survival_times", "counts_drug", "counts_mets"]],
+        expand("%s/km_curves/{tumor_type}/trt_met_rmh_grim/km_curves_trt_{tumor_type}.pdf" % R_FOLDER,
+            tumor_type=config["km_curves"]["tumor_types"]),
+        expand("%s/km_curves/{tumor_type}/by_{events}" % R_FOLDER, tumor_type=config["km_curves"]["tumor_types"],
+            events=config["km_curves"]["events"]),
+        expand("%s/km_curves/{tumor_type}/by_subtype/km_curves_by_tme_subtypes.pdf" % R_FOLDER,
+            tumor_type=config["km_curves"]["tumor_types"]),
+        #### MODEL PREPROCESSING ####
+        expand("%s/data_{cohort}/all_features/{table}.tsv.gz" % R_FOLDER, cohort=COHORTS, table=["data", "covs"]),
+        expand("%s/data_{cohort}/sub_features/{samples}/{features}/original/data.original.tsv.gz" % R_FOLDER,
+           get_allowed_doublets_samples_features(), cohort=COHORTS, samples=SAMPLES, features=FEATURES),
+        #### MODEL FITTING & POOLING ####
+        expand("%s/models_{cohort}/{samples}/{features}/{selection}_{model}/covs.pooled_ax_rep.tsv.gz" % R_FOLDER,
+            get_allowed_tuples_samples_features_selection_model(), cohort=COHORTS, samples=SAMPLES, features=FEATURES,
+            selection=SELECTIONS, model=MODELS),
+        #### MODEL PLOTTING ####
+        expand("%s/plots_{cohort}/{samples}/{features}/forester_coeffs_{selection}_{model}.pdf" % R_FOLDER,
+            get_allowed_tuples_samples_features_selection_model(), cohort=COHORTS, samples=SAMPLES, features=FEATURES,
+            selection=SELECTIONS, model=MODELS),
+        expand("%s/plots_{cohort}/{samples}/boxplot_cindex_{time_horizon}_{selection}.pdf" % R_FOLDER,
+            cohort=COHORTS, samples=SAMPLES, time_horizon=[180], selection=SELECTIONS),
+        expand("%s/plots_{cohort}/{samples}/{features}/km_curves_risk_{selection}_{model}_{cohort_pred}.pdf" % R_FOLDER,
+            get_allowed_tuples_samples_features_selection_model(), cohort=["prism"], samples=SAMPLES, features=FEATURES,
+            selection=SELECTIONS, model=MODELS, cohort_pred=["prism", "tcga"]),
+        expand("%s/plots_{cohort}/{samples}/{features}/km_curves_risk_{selection}_{model}_{cohort_pred}.pdf" % R_FOLDER,
+            get_allowed_tuples_samples_features_selection_model(), cohort=["tcga"], samples=SAMPLES, features=FEATURES,
+            selection=SELECTIONS, model=MODELS, cohort_pred=["tcga", "prism"]),
+        #### PAPER FIGURES ####
+        "%s/F1e.svg" % F_FOLDER
+
+##### Modules #####
+
+include: "../../common/rules/setup.smk"
+include: "../../common/rules/selection.smk"
+include: "rules/description.smk"
+include: "rules/km_curves.smk"
+include: "rules/model_prepro.smk"
+include: "rules/model_fitting.smk"
+include: "rules/model_plotting.smk"
+
+##### End messages #####
+
+onsuccess:
+    print("Workflow finished, no error")
+
+onerror:
+    print("An error occurred")

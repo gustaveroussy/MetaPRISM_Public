@@ -1,0 +1,250 @@
+setup:
+  MetaPrism: ../../../common/envs/MetaPrism.yaml
+
+data:
+  bio: ../../../data/prism/clinical/curated/bio_prism_in_design_curated.tsv
+  cln: ../../../data/prism/clinical/curated/cln_prism_in_design_curated.tsv
+  cln_brca: ../../../data/prism/clinical/curated_other/cln_prism_brca_curated.tsv
+  cln_covariates: resources/table_clinical_covariates.xlsx
+  driver_genes: ../../../data/resources/curated/cancer_genes_curated.tsv
+  dna_cna_chr_arm: ../../../data/prism/wes/somatic_cna/somatic_cna_per_chr_arm.tsv
+  dna_cna_per_gene: ../../../data/prism/wes/somatic_cna/somatic_cna.tsv.gz
+  dna_cna_summary_stats: ../../../data/prism/wes/somatic_cna/somatic_cna_summary_statistics.tsv.gz
+  dna_mut_signatures: ../../../results/mutational_signatures/projection_known_signatures/MutationalPatterns/counts_signatures_cosmic_sbs_96_v3.2_sbs_96_min_mut_sparse_sigprofilerjulia_prism.tsv
+  dna_mut_counts_gene: 
+    - ../../../results/somatic_mutations/count/count_by_gene_oncokb_cosmic_DNA_non_synonymous_prism.tsv
+  dna_mut_counts_pathway:
+    - ../../../results/somatic_mutations/count/count_by_pathway_cpad_kegg_DNA_non_synonymous_prism.tsv
+    - ../../../results/somatic_mutations/count/count_by_pathway_sanchez_vega_DNA_non_synonymous_prism.tsv
+    - ../../../results/somatic_mutations/count/count_by_pathway_msigdb_hallmarks_DNA_non_synonymous_prism.tsv
+  dna_mut_counts_total:
+    - ../../../results/somatic_mutations/count/count_total_DNA_all_prism.tsv
+  dna_alt_counts_gene:
+    - ../../../results/combined_alterations/count/count_by_gene_DNA_annotated_prism.tsv
+  dna_alt_counts_pathway:
+    - ../../../results/combined_alterations/count/count_by_pathway_cpad_kegg_DNA_annotated_prism.tsv
+    - ../../../results/combined_alterations/count/count_by_pathway_sanchez_vega_DNA_annotated_prism.tsv
+    - ../../../results/combined_alterations/count/count_by_pathway_msigdb_hallmarks_DNA_annotated_prism.tsv
+  dna_alt_counts_total:
+    - ../../../results/combined_alterations/count/count_total_DNA_annotated_prism.tsv
+  dna_rna_alt_counts_gene:
+    - ../../../results/combined_alterations/count/count_by_gene_DNA_RNA_annotated_prism.tsv
+  dna_rna_alt_counts_pathway:
+    - ../../../results/combined_alterations/count/count_by_pathway_cpad_kegg_DNA_RNA_annotated_prism.tsv
+    - ../../../results/combined_alterations/count/count_by_pathway_sanchez_vega_DNA_RNA_annotated_prism.tsv
+    - ../../../results/combined_alterations/count/count_by_pathway_msigdb_hallmarks_DNA_RNA_annotated_prism.tsv
+  dna_rna_alt_counts_total:
+    - ../../../results/combined_alterations/count/count_total_DNA_RNA_annotated_prism.tsv
+  dna_msi_status_score: ../../../data/prism/wes/somatic_msi/somatic_msi.tsv
+  rna_gex_tf_signatures: ../../../results/rna_general/dorothea/tf_oncogenic_prism.tsv
+  rna_gex_tme_bagaev:
+    - ../../../results/immuno_analysis/prism/tables/mfp_subtypes_predicted_LogisticRegression.tsv
+  rna_gex_ssgsea_pathway:
+    - ../../../results/rna_general/ssgsea/ssgsea_by_pathway_immune_bagaev_prism.tsv.gz
+    - ../../../results/rna_general/ssgsea/ssgsea_by_pathway_msigdb_H_prism.tsv.gz
+    - ../../../results/rna_general/ssgsea/ssgsea_by_pathway_msigdb_C2_Reactome_prism.tsv.gz
+    - ../../../results/rna_general/ssgsea/ssgsea_by_pathway_msigdb_C6_prism.tsv.gz
+    - ../../../results/rna_general/ssgsea/ssgsea_by_pathway_msigdb_C8_prism.tsv.gz
+  rna_fus_counts_total:
+    - ../../../results/fusions_analysis/count/count_total_RNA_all_prism.tsv
+
+description:
+  cohort: prism
+  min_count: 10
+
+filepaths:
+  base: ../../../data
+  yaml: ../../../data/organisation/DATA_ORGANISATION.yaml
+
+
+selection:
+  cohorts:
+    - prism
+
+  col_tt: "Project_TCGA_More"
+  algos:
+    DNA_T:
+      - somatic_maf
+      - somatic_msi
+      - somatic_cna
+    RNA_T:
+      - kallisto-tximport
+      - fusions
+  sample_types: 
+    all_cohort: null
+    dna_cohort:
+      - DNA_T
+    rna_cohort:
+      - RNA_T
+  tt_keep_min_sizes:
+    all_cohort: 1
+    dna_cohort: 10
+    rna_cohort: 10
+  tt_keeps:
+    all_cohort: null
+    dna_cohort: null
+    rna_cohort: null
+  tt_drops:
+    all_cohort: null
+    dna_cohort:
+      - "MISC - Not_TCGA"
+      - Unknown_Primary
+      - "N/A"
+    rna_cohort:
+      - "MISC - Not_TCGA"
+      - Unknown_Primary
+      - "N/A"
+
+
+models:
+  preprocess:
+    spread_discrete_ordered: "No"
+    min_size: 5
+    seed: 123
+    n_imputations: 4
+    n_iterations: 15
+
+  fitting:
+    outcome_var: Drugs_Before_Biopsy
+    seed: 123
+    k_cv: 5
+    n_boot: 100
+    n_xval: 20
+    repeat_mode: xval
+    threads: 6
+    models_grids: config/models_grids.yaml
+    selections_grids: config/selections_grids.yaml
+
+  outcome_rgxs:
+    LUAD:
+      - ERLOTINIB
+      - GEFITINIB
+      - OSIMERTINIB
+
+  models:
+    - LogisticRegressionStandard
+    - LogisticRegressionLasso
+    - RandomForestClassifier
+
+  samples:
+    #BRCA_dna:
+    #  - dna_1
+    #  - dna_2
+    #  - dna_3
+    #  - dna_4
+    #  - dna_5
+
+    #BLCA_dna:
+    #  - dna_1
+    #  - dna_2
+    #  - dna_3
+    #  - dna_4
+    #  - dna_5
+
+    LUAD_dna:
+      - dna_1
+      - dna_2
+      - dna_3
+      - dna_4
+
+    LUAD_rna:
+      - rna_1
+
+    LUAD_dna_rna:
+      - dna_1_rna_1
+      - dna_2_rna_1
+      - dna_3_rna_1
+
+    # LUAD_dna_rna:
+    #   - dna_1_rna_1
+
+    #PAAD_dna:
+    #  - dna_1
+    #  - dna_2
+    #  - dna_3
+    #  - dna_4
+    #  - dna_5
+
+    #PRAD_dna:
+    #  - dna_1
+    #  - dna_2
+    #  - dna_3
+    #  - dna_4
+    #  - dna_5
+
+  features:
+    dna_1:
+      - "Clinical-Subject"
+      - "Project_TCGA_More"
+      - "DNA-Mutation_Status_Total"
+      - "DNA-Alteration_Counts_Total"
+      - "DNA-MSI"
+      - "DNA-CNA_Summary_Statistics"
+      - "DNA-CNA_Chr_Arm"
+
+    dna_2:
+      - "Clinical-Subject"
+      - "Project_TCGA_More"
+      - "DNA-Mutation_Status_Total"
+      - "DNA-Alteration_Counts_Total"
+      - "DNA-MSI"
+      - "DNA-Alteration_Status_Gene-gene_annotated"
+
+    dna_3:
+      - "Clinical-Subject"
+      - "Project_TCGA_More"
+      - "DNA-Mutation_Status_Total"
+      - "DNA-Alteration_Counts_Total"
+      - "DNA-MSI"
+      - "DNA-CNA_Summary_Statistics"
+      - "DNA-CNA_Chr_Arm"
+      - "DNA-Alteration_Status_Gene-gene_annotated"
+      - "DNA-Alteration_Counts_Pathway-sanchez_vega_annotated"
+      - "DNA-Alteration_Counts_Pathway-msigdb_hallmarks_annotated"
+      - "DNA-Alteration_Counts_Pathway-cpad_kegg_annotated"
+
+    dna_4:
+      - "Clinical-Subject"
+      - "Project_TCGA_More"
+      - "DNA-Mutation_Status_Total"
+      - "DNA-Alteration_Counts_Total"
+      - "DNA-MSI"
+      - "DNA-CNA_Summary_Statistics"
+      - "DNA-CNA_Chr_Arm"
+      - "DNA-Mutation_Status_Gene-gene_non_synonymous"
+      - "DNA-Mutation_Counts_Pathway-sanchez_vega_non_synonymous"
+      - "DNA-Mutation_Counts_Pathway-cpad_kegg_non_synonymous"
+      - "DNA-Mutation_Counts_Pathway-msigdb_hallmarks_non_synonymous"
+
+    rna_1:
+      - "Clinical-Subject"
+      - "Project_TCGA_More"
+      - "RNA-Expression_Signature-TF"
+      - "RNA-Expression_Signature-immune_bagaev"
+      - "RNA-Expression_Signature-msigdb_H"
+      - "RNA-Fusion_Count_Total"
+
+    dna_1_rna_1:
+      - dna_1
+      - rna_1
+
+    dna_2_rna_1:
+      - dna_2
+      - rna_1
+
+    dna_3_rna_1:
+      - dna_3
+      - rna_1
+
+  selections:
+    default:
+      - None
+      - LogisticRegressionStandard:
+        - "lasso"
+        - "10%_fdr"
+        - "50%_rfe"
+      - LogisticRegressionLasso:
+        - "50%_rfe_SVC"
+
+    dna_1:
+      - None

@@ -1,0 +1,33 @@
+name: Signatures
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+  - r
+dependencies:
+  - julia=1.6.1
+  - r-argparse=2.1.1
+  - r-base=4.1.1
+  - r-cpp11=0.3.1
+  - r-deconstructsigs=1.9.0
+  - r-doparallel=1.0.17
+  - r-dplyr=1.0.7
+  - r-exact=3.1
+  - r-generics=0.1.0
+  - r-glue=1.4.2
+  - r-lifecycle=1.0.0
+  - r-magrittr=2.0.1
+  - r-pillar=1.6.2
+  - bioconductor-maftools=2.10.0
+  - bioconductor-mutationalpatterns=3.4.0
+  - r-nmf=0.21.0
+  - r-readr=2.0.1
+  - r-readxl=1.3.1
+  - r-rlang=1.0.2
+  - r-sigminer=2.1.2
+  - r-tibble=3.1.4
+  - r-tidyr=1.1.3
+  - r-tidyselect=1.1.1
+  - r-vctrs=0.3.8
+  - r-vroom=1.5.5
+  - r-writexl=1.4.0

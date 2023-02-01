@@ -1,0 +1,34 @@
+# @created: 07 Apr 2022
+# @modified: 01 Feb 2023
+# @uthor: Yoann Pradat
+#
+# This pipeline performs an analysis of the associations between genotype and treatment resistances.
+
+include: "rules/common.smk"
+
+##### Target rules #####
+
+rule all:
+    input:
+        expand("%s/plots/double_htmp_{tumor_type}_{level}.pdf" % R_FOLDER,
+            tumor_type=["All", "BLCA", "BRCA", "LUAD", "PAAD", "PRAD"], level=["Drugs", "Classes"]),
+        expand("%s/selection/selection_{table}.tsv" % R_FOLDER, table=["tumor_types", "samples_prism"]),
+        expand("%s/plots/comuts/oncoplot_{tumor_type}_{level}.pdf" % R_FOLDER,
+            tumor_type=["BLCA", "BRCA", "COAD", "CHOL", "HNSC", "LUAD", "PRAD"], level=["Drugs"])
+        #### FIGURES PAPER ####
+        expand("%s/F6_{tumor_type}_{level}.eps" % F_FOLDER,
+            tumor_type=["BLCA", "BRCA", "COAD", "CHOL", "HNSC", "LUAD", "PRAD"], level=["Drugs"])
+
+##### Modules #####
+
+include: "../../common/rules/setup.smk"
+include: "../../common/rules/selection.smk"
+include: "rules/plots.smk"
+
+##### End messages #####
+
+onsuccess:
+    print("Workflow finished, no error")
+
+onerror:
+    print("An error occurred")

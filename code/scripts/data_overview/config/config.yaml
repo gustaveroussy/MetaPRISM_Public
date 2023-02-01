@@ -1,0 +1,131 @@
+setup:
+  MetaPrism: ../../../common/envs/MetaPrism.yaml
+
+data:
+  alts_table: ../../../results/combined_alterations/alterations/aggregated_alterations_prism.tsv
+  sigs_table: ../../../results/mutational_signatures/projection_known_signatures/MutationalPatterns/counts_signatures_cosmic_sbs_96_v3.2_sbs_96_min_mut_sparse_sigprofilerjulia_prism.tsv
+
+tumor_types:
+  cohorts:
+    - prism
+    - met500
+    - tcga
+  min_count: 10
+  tt_drop:
+    - N/A
+    - "'MISC - Not_TCGA'"
+
+treatments:
+  cohort: prism
+  barplots:
+    description:
+      tumor_types:
+        - All
+    resistance:
+      tumor_types:
+        - BRCA
+        - BLCA
+        - COAD
+        - CHOL
+        - HNSC
+        - LUAD
+        - LUSC
+        - PAAD
+        - PRAD
+  
+  forester_1:
+    drugs:
+      - platinum_salts
+      # - hormonotherapy
+      # - targeted_alk-ros1
+      # - targeted_braf
+      # - targeted_egfr
+      # - targeted_her2
+    
+    tumor_types:
+      - All
+      - LUAD
+
+    platinum_salts:
+      A_name: "'Platinum Tx'"
+      B_name: "'No Platinum Tx'"
+      drug_classes:
+        - Platinum_salts
+      drug_names: null
+      sigs_names:
+        - SBS31
+        - SBS35
+
+
+    targeted_alk-ros1:
+      A_name: "'Targeted ALK/ROS1 Tx'"
+      B_name: "'No Targeted ALK/ROS1 Tx'"
+      drug_classes:
+        - "'Targeted_Therapy - ALK/ROS1'"
+      drug_names: null
+      sigs_names: null
+
+
+    targeted_braf:
+      A_name: "'Targeted BRAF Tx'"
+      B_name: "'No Targeted BRAF Tx'"
+      drug_classes:
+        - "'Targeted_Therapy - BRAF'"
+      drug_names: null
+      sigs_names: null
+
+
+    targeted_egfr:
+      A_name: "'Targeted EGFR Tx'"
+      B_name: "'No Targeted EGFR Tx'"
+      drug_classes:
+        - "'Targeted_Therapy - EGFR'"
+      drug_names: null
+      sigs_names: null
+
+
+    targeted_her2:
+      A_name: "'Targeted HER2 Tx'"
+      B_name: "'No Targeted HER2 Tx'"
+      drug_classes:
+        - "'Targeted_Therapy - HER2'"
+      drug_names: null
+      sigs_names: null
+
+
+    hormonotherapy:
+      A_name: "'Hormonotherapy Tx'"
+      B_name: "'No Hormonotherapy Tx'"
+      drug_classes:
+        - Hormonotherapy
+      drug_names: null
+      sigs_names: null
+
+
+  forester_2:
+    drugs:
+      - on_label
+    
+    tumor_types:
+      - All
+      - LUAD
+
+    on_label:
+      A_name: "Tx"
+      B_name: "'No Tx'"
+      drug_classes:
+        - "'Antiangiogenic - VEGF'"
+        - "'Hormonotherapy'"
+        - "'Platinum_salts'"
+        - "'Targeted_Therapy - BRAF'"
+        - "'Targeted_Therapy - EGFR'"
+        - "'Targeted_Therapy - HER2'"
+        - "'Targeted_Therapy - ALK/ROS1'"
+        - "'Immunotherapy - Checkpoint_inhibitor - PD1/PD-L1'"
+      drug_names: null
+      sigs_names: null
+
+        
+filepaths:
+  base: ../../../data
+  yaml: ../../../data/organisation/DATA_ORGANISATION.yaml

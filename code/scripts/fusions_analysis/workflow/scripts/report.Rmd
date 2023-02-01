@@ -1,0 +1,226 @@
+---
+title: "META-PRISM: Analysis of fusions"
+author:
+  - Daniel Gautheret^[I2BC, CNRS, CEA & Université Paris-Saclay, 91190 Gif-Sur-Yvette, France
+      (daniel.gautheret@i2bc.paris-saclay.fr)]
+  - Yoann Pradat^[MICS Lab CentraleSupelec, 91190 Gif-Sur-Yvette, France (yoann.pradat@centralesupelec.fr)]
+date: "`r format(Sys.time(), '%d %B, %Y')`"
+bibliography: ../assets/references.bib
+link-citations: true
+params:
+  cohorts: null
+  counts: null
+  fusions: null
+  samples: null
+  tables_burden: null
+  tables_driver_fus: null
+  tables_driver_gen: null
+output:
+  bookdown::html_document2:
+    theme: cosmo
+    css: ../assets/configure.css
+    toc: true
+    toc_float: true
+    code_folding: show
+  rmdformats::material:
+    highlight: kate
+---
+
+<style>
+pre {
+  overflow-x: auto;
+}
+pre code {
+  word-wrap: normal;
+  white-space: pre;
+}
+body {
+  text-align: justify
+}
+</style>
+
+```{r hidden paramers, include=F}
+knitr::opts_knit$set(root.dir = '../..')
+library(stringr)
+nrows_render_tables <- 5 # set to -1 to render full tables
+params_cohorts <- unlist(strsplit(params$cohorts, split="\\s"))
+params_fusions <- unlist(strsplit(params$fusions, split="\\s"))
+params_samples <- unlist(strsplit(params$samples, split="\\s"))
+params_tables_burden <- unlist(strsplit(params$tables_burden, split="\\s"))
+params_tables_driver_fus <- unlist(strsplit(params$tables_driver_fus, split="\\s"))
+params_tables_driver_gen <- unlist(strsplit(params$tables_driver_gen, split="\\s"))
+```
+
+This file is a short report presenting the key steps of the fusions analysis pipeline along with some key figures. The
+cohorts analyzed in this pipeline are `r paste(params_cohorts, collapse=", ")`
+
+# Libraries
+
+```{r R setup libraries, message=F}
+options(run.main=FALSE)
+source("workflow/functions/io.R")
+source("workflow/scripts/02.2_plot_burden.R")
+source("workflow/scripts/03.2_plot_driver.R")
+
+library(readr)
+
+# in-house packages
+library(rprism)
+library(rprismtools)
+```
+
+# Data used
+
+In this analysis pipeline, data from different sources was used. In particular,
+
+- **curated clinical tables** where used for each cohort. These were produced after careful manual review and automatic
+  assembly of multiple annotation files. They are loaded using the `rprism::load_cln` function.
+
+- **aggregated fusion calls** file for each cohort.
+  * **MET500** fusion calls are available on the nextcloud at `r rprism:::get_filepath_fusions("met500")`. All
+    fusions called by one of the fusion callers described in the fusion pipeline description notebook.
+  * **PRISM** fusion calls are available on the nextcloud at `r rprism:::get_filepath_fusions("prism")`. All fusions
+    called by one of the fusion callers described in the fusion pipeline description notebook.
+  * **TCGA** fusion calls are available on the nextcloud at `r rprism:::get_filepath_fusions("tcga")`. Supplementary
+    file of the paper [@gao_driver_2018].
+
+
+# Preprocessing
+
+## Fusions annotation
+
+In order to align the META-PRISM fusion calling pipeline with that employed on the TCGA data in [@gao_driver_2018],
+only fusions called jointly by **Arriba** or **Starfusion** were retained. The details of the rationale for this choice
+are detailed in the rna pipeline description file.
+
+Further filtering was applied in order to purify the final list of fusions analyzed. For all fusions of TCGA, PRISM and
+MET500, only those fusions that
+
+* are in the COSMIC white list (see `cosmic-V92-fusions-curated.tsv` in the folder
+  "resources/fusions_analysis/fusion_lists" on the nextcloud)
+* are in the ChiTaRS white list (see `Chitars-TIC.tsv` in the folder
+  "resources/fusions_analysis/fusion_lists" on the nextcloud)
+* are not in the Bibaceanu black list (see `blacklist-Bibaceanu-enhanced.tsv` in the folder
+  "resources/fusions_analysis/fusion_lists" on the nextcloud)
+
+were retained.
+
+Eventually, for the **driver analysis**, only fusions where at least one of the involved genes is known to be a cancer
+driver (COSMIC cancer gene census list v92, only Tier 1 genes) or fusions that are listed in the COSMIC database of
+fusions were analyzed. 
+
+The script "01.1_preprocess_fusions.R" loads all the fusion calls for each cohort and add filtering annotations for the
+filters described above. It also adds some patients and sample annotations that are useful for grouping samples in some
+of the anlyses. The tables below show the first lines of annotated fusion call tables for each cohort.
+
+```{r read fusions, include=F}
+dfs_fus <- load_fusions_for_analysis(params_cohorts, params_fusions, NULL, NULL)
+```
+
+<div style = "width:100%; height:auto; margin: auto;">
+```{r show fus prism, echo=F}
+render_table(dfs_fus[["prism"]], caption="Annotated fusions PRISM", extensions=c("Responsive"))
+```
+</div>
+
+<div style = "width:100%; height:auto; margin: auto;">
+```{r show fus met500, echo=F}
+render_table(dfs_fus[["met500"]], caption="Annotated fusions MET500", extensions=c("Responsive"))
+```
+</div>
+
+<div style = "width:100%; height:auto; margin: auto;">
+```{r show fus tcga, echo=F}
+render_table(dfs_fus[["tcga"]], caption="Annotated fusions TCGA", extensions=c("Responsive"))
+```
+</div>
+
+## Samples selection 
+
+As not all cohorts have samples for all tumor types, the list of tumor types analyzed was restricted. As the focus of
+ths study is on samples from the PRISM cohort, the set of tumor type was restricted to tumor types present in PRISM with
+a sufficient number of samples. For some analyses, especially for the **driver analysis** where we compare the
+prevalence of some events between all cohorts, it was necessary to further restrict the list of tumor types analyzed
+to the intersection of tumor types between all cohorts. The table below summarizes the number of samples available for
+each tumor type in each cohort and provides binary indicators that indicate whict tumor type was used in which analysis.
+
+```{r load counts tt, include=F}
+df_counts_tt <- read_tsv(params$counts, col_types=cols())
+```
+
+<div style = "width:100%; height:auto; margin: auto;">
+```{r show tumor type counts, echo=F}
+render_table(df_counts_tt, caption="Tumor types counts and selection", nrows=-1, extensions=c("Responsive"))
+```
+</div>
+
+# Fusions burden 
+
+In this analsyis, the fusions burden of each tumor type was compared between all cohorts.  The analysis is performed in
+the script **02.1_burden_tables.R** and **02.2_plot_burden.R**. The following figure summarizes this comparison for
+common tumor types.
+
+```{r burden plot, echo=F, message=F, fig.width=7.1, fig.height=5, fig.align="center", dpi=140}
+# load
+dfs_burden <- setNames(lapply(params_tables_burden, read_tsv, col_types=cols()), params_cohorts)
+dfs_burden <- lapply(dfs_burden, function(df) df %>% replace(.==0, 0.5))
+
+# plot
+cohorts2colors <- load_colors(sheet="Global")[params_cohorts]
+draw_burden_plot_fusion(dfs_burden, cohorts2colors)
+```
+
+
+# Driver fusions
+
+In this analsyis, the prevalence of some fusions was compared between all cohorts as well as the prevalence of genes
+involved in fusions. For the latter, only "cancer driver genes" were considered (see above). The analysis is performed in
+the script **03.1_driver_tables.R** and **03.2_plot_driver.R**. The following figures summarizes both comparisons for
+common tumor types.
+
+Here is the figure for fusions.
+
+```{r driver plot fus, echo=F, warning=F, fig.width=6.4, fig.height=3.2, fig.align="center", dpi=300}
+dfs_plot <- read_plot_tables(params_tables_driver_fus)
+cohorts2colors <- load_colors(sheet="Global")[c("tcga", "met500")]
+stacks2colors <- list(`Known COSMIC`="#B3DE6A", Novel="#80B1D3", `Known ChiTaRS only`="#FDB462")
+col_var <- "Fusion_Id"
+col_stack <- NULL
+
+# plot
+fig <- draw_prevalence_plot(dfs_plot, col_var=col_var, cohorts2colors=cohorts2colors,
+                            alpha_left=0.05, alpha_heatmap=0.05,
+                            name_left_pvals="pvalsstrats", name_heatmap_pvals="pvals",
+                            col_stack=col_stack, stacks2colors=stacks2colors)
+fig <- fig %>% layout(autosize=F, width=900, height=450, margin=list(b=0))
+fig
+```
+
+Here is the figure for "cancer driver genes" involved in fusions.
+
+```{r driver plot gen, echo=F, warning=F, out.width="100%"}
+dfs_plot <- read_plot_tables(params_tables_driver_gen)
+cohorts2colors <- load_colors(sheet="Global")[c("tcga", "met500")]
+stacks2colors <- list(`Known COSMIC`="#B3DE6A", Novel="#80B1D3", `Known ChiTaRS only`="#FDB462")
+col_var <- "Hugo_Symbol"
+col_stack <- "Fusion_Status"
+
+# plot
+fig <- draw_prevalence_plot(dfs_plot, col_var=col_var, cohorts2colors=cohorts2colors,
+                            alpha_left=0.05, alpha_heatmap=0.05,
+                            name_left_pvals="pvalsstrats", name_heatmap_pvals="pvals",
+                            col_stack=col_stack, stacks2colors=stacks2colors)
+fig <- fig %>% layout(autosize=F, width=1200, height=600, margin=list(b=0))
+fig
+```
+
+
+# Notebook configuration
+
+Here is the R configuration
+
+```{r r config}
+sessionInfo()
+```
+
+`r if (knitr::is_html_output()) '# References {-}'`

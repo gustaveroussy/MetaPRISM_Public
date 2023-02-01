@@ -1,0 +1,12 @@
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - perl-db-file ==1.855
+  - perl-findbin ==1.51
+  - perl-getopt-long ==2.50
+  - perl-json-xs ==4.02
+  - perl-data-dumper ==2.173
+  - perl-carp ==1.38
+  - perl-exporter ==5.72

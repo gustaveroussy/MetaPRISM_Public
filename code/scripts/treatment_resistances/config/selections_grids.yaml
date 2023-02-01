@@ -1,0 +1,17 @@
+# Models for performing features selection =============================================================================
+
+LogisticRegressionLasso:
+  C:
+    start: -3
+    stop: 3
+    num: 100
+    func: np.logspace
+  random_state:
+    - 123
+  penalty:
+    - 'l1'
+  fit_intercept:
+    - true
+  solver:
+    - saga
+

@@ -1,0 +1,45 @@
+# @created: 26 Jul 2021
+# @modified: 02 Jan 2023
+# @uthor: Yoann Pradat
+#
+# This pipeline runs an exhaustive immune subtype analysis from the gene expression tables of tumor samples from all
+# three cohorts META-PRISM, MET500, and TCGA.
+
+include: "rules/common.smk"
+
+##### Target rules #####
+
+rule all:
+    input:
+        expand("%s/selection/selection_samples_{cohort}.tsv" % R_FOLDER, cohort=DATA_COHORTS),
+        expand("%s/gene_tables/{gene_table}_updated.tsv" % R_FOLDER,
+            gene_table=list(config["resources"]["gene_tables"].keys())),
+        expand("%s/{cohort}/tables/signatures_bagaev_2021_mfp.tsv" % R_FOLDER, cohort=DATA_COHORTS),
+        expand("%s/{cohort}/tables/signatures_bagaev_2021_gsva.tsv" % R_FOLDER, cohort=DATA_COHORTS),
+        "%s/tcga/checks/mfp_tcga_check_expression.png" % R_FOLDER,
+        "%s/tcga/checks/mfp_tcga_check_signatures.png" % R_FOLDER,
+        expand("%s/{cohort}/mfp_models/{model_name}/pipeline_train.joblib" % R_FOLDER,
+                cohort=MFP_MODELS_COHORTS, model_name=MFP_MODELS_NAMES),
+        expand("%s/{cohort}/tables/mfp_subtypes_predicted_{model_name}.tsv" % R_FOLDER,
+                cohort=MFP_PREDICT_COHORTS, model_name=MFP_MODELS_NAMES),
+        expand("%s/{cohort}/tables/signatures_mfp_model_preprocessed.tsv" % R_FOLDER,
+                cohort=MFP_PREDICT_COHORTS),
+        expand("%s/{cohort}/plots" % R_FOLDER, cohort=DATA_COHORTS),
+        #### PAPER FIGURES ####
+        expand("%s/F4a.svg" % F_FOLDER)
+
+##### Modules #####
+
+include: "../../common/rules/setup.smk"
+include: "../../common/rules/selection.smk"
+include: "rules/signatures.smk"
+include: "rules/checks.smk"
+include: "rules/mfp_models.smk"
+
+##### End messages #####
+
+onsuccess:
+    print("Workflow finished, no error")
+
+onerror:
+    print("An error occurred")

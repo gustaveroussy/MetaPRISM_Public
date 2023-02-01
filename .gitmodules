@@ -16,3 +16,15 @@
 [submodule "code/pipelines/rnafusion"]
 	path = code/pipelines/rnafusion
 	url = https://github.com/nf-core/rnafusion
+[submodule "code/scripts/fusions_analysis/external/FusionAnnotator"]
+	path = code/scripts/fusions_analysis/external/FusionAnnotator
+	url = https://github.com/FusionAnnotator/FusionAnnotator
+[submodule "code/scripts/fusions_analysis/external/oncokb-annotator"]
+	path = code/scripts/fusions_analysis/external/oncokb-annotator
+	url = https://github.com/oncokb/oncokb-annotator
+[submodule "code/scripts/immuno_analysis/external/MFP"]
+	path = code/scripts/immuno_analysis/external/MFP
+	url = https://github.com/BostonGene/MFP
+[submodule "code/scripts/mutational_signatures/external/sigprofilerjulia"]
+	path = code/scripts/mutational_signatures/external/sigprofilerjulia
+	url = https://github.com/ypradat/sigprofilerjulia.git

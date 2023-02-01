@@ -1,0 +1,138 @@
+# Individual classifiers ===============================================================================================
+
+AdaBoostClassifier:
+  n_estimators:
+    start: 100
+    stop: 420
+    step: 20
+    func: np.arange
+  learning_rate:
+    start: -2
+    stop: 2
+    num: 20
+    func: np.logspace
+  random_state:
+    - 123
+
+
+KNeighborsClassifier:
+  n_neighbors:
+    start: 2
+    stop: 82
+    step: 1
+    func: np.arange
+  weights:
+    - uniform
+    - distance
+  algorithm:
+    - auto
+  metric:
+    - minkowski
+
+
+LogisticRegression:
+  C:
+    start: -3
+    stop: 3
+    num: 40
+    func: np.logspace
+  random_state:
+    - 123
+  penalty:
+    - elasticnet
+  fit_intercept:
+    - true
+  solver:
+    - saga
+  l1_ratio:
+    start: 0
+    stop: 1
+    num: 40
+    func: np.linspace
+
+
+RandomForestClassifier:
+  n_estimators:
+    start: 10
+    stop: 410
+    step: 10
+    func: np.arange
+  random_state:
+    - 123
+  criterion:
+    - gini
+  bootstrap:
+    - true
+  max_features:
+    - sqrt
+    - 1
+    - 2
+    - log2
+
+SVC:
+  C:
+    start: -3
+    stop: 3
+    num: 40
+    func: np.logspace
+  kernel:
+    - rbf
+  degree:
+    - 3
+  gamma:
+    - scale
+    - auto
+  probability:
+    - true
+  random_state:
+    - 123
+
+
+# Combining individual classifiers =====================================================================================
+
+# MetaA methods following the following scheme. Considering a list of n estimators.
+#  - Split the training data in k folds
+#  - Train each of the n estimators on k-1 folds, predict on the leave-out fold.
+#  - Train the meta model on the output of n estimators on the same k-1 folds, predict on the leave-out fold. 
+  
+# MetaB methods following the following scheme. Considering a list of n estimators.
+#  - Split the training data in k folds
+#  - Train each of the n estimators on k-1 folds, predict on the leave-out fold.
+#  - Perform the previous step k times and learn a new representation of the data by combining the k predictions on the
+#  leave-out folds.
+#  - Train the meta model on this new representation of the data. It is not mandatory to use the same cv splits on this
+#  new training.
+
+MetaAVotingClassifier:
+  estimators:
+    AdaBoostClassifier: best_params
+    KNeighborsClassifier: best_params
+    LogisticRegression: best_params
+    RandomForestClassifier: best_params
+    SVC: best_params
+  weights: f1_macro
+  voting:
+    - hard
+    - soft
+  flatten_transform:
+    - false
+
+MetaBLogisticRegression:
+  C:
+    start: -3
+    stop: 3
+    num: 40
+    func: np.logspace
+  random_state:
+    - 123
+  penalty:
+    - elasticnet
+  fit_intercept:
+    - true
+  solver:
+    - saga
+  l1_ratio:
+    start: 0
+    stop: 1
+    num: 40
+    func: np.linspace

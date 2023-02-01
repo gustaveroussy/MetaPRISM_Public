@@ -1,0 +1,133 @@
+setup:
+  MetaPrism: ../../../common/envs/MetaPrism.yaml
+
+data:
+  cohorts:
+    - prism
+    - met500
+    - tcga
+
+  aggregate:
+    met500:
+      algos:
+        - arriba
+        - ericscript
+        - pizzly
+        - starfusion
+
+    prism:
+      algos:
+        - arriba
+        - ericscript
+        - pizzly
+        - starfusion
+
+    tcga:
+      algos:
+        - deepest_pnas_2019
+        - prada_nar_2018
+        - starfusion_cell_2018
+
+    tcga_validation:
+      algos:
+        - arriba
+        - ericscript
+        - fusioncatcher
+        - pizzly
+        - squid
+        - starfusion
+
+  resources:
+    drivers: ../../../data/resources/curated/cancer_genes_curated.tsv
+    fusions_lists: resources/fusions_lists
+    gencode: ../../../data/resources/gencode/gencode.v27.annotation_genes.tsv
+    genome_lib_dir: resources/ctat_resource_lib/ctat_genome_lib_build_dir
+    hgnc: ../../../data/resources/hgnc/hgnc_all_symbols_09092021.tsv
+
+  fusion_annotator: external/FusionAnnotator/FusionAnnotator
+
+selection:
+  cohorts:
+    - prism
+    - met500
+    - tcga
+  col_tt: "Project_TCGA_More"
+  sample_types: 
+    - RNA_T
+  algos:
+    RNA_T:
+      - fusions
+  tt_keep_min_sizes:
+    burden: 10
+    driver: 10
+  tt_keeps: null
+  tt_drops:
+    burden:
+      - MISC
+      - Unknown_Primary
+      - "N/A"
+    driver:
+      - MISC
+      - Not_TCGA
+      - Unknown_Primary
+      - "N/A"
+
+burden:
+  all:
+    output_width: 1600
+    output_height: 700
+  sel:
+    output_width: 1000
+    output_height: 700
+
+
+driver:
+  prism:
+    min_counts_fus: 2
+    min_counts_gen: 4
+  met500:
+    min_counts_fus: 2
+    min_counts_gen: 4
+  tcga:
+    min_counts_fus: 10
+    min_counts_gen: 20
+  output_width: 
+    fus: 500
+    gen: 700
+  output_height:
+    fus: 350
+    gen: 450
+
+
+heatmap:
+  min_counts_evt:
+    fusions:
+      prism: 4
+      met500: 1000
+      tcga: 1000
+    genes:
+      prism: 4
+      met500: 6
+      tcga: 40
+
+  height_one: 12
+  width_one: 40
+
+
+params:
+  oncokb:
+    code_dir: external/oncokb-annotator
+    data_dir: external/oncokb-annotator/data
+    token: XXXX
+    rules_clean: ../../../data/resources/oncokb/OncoKB_Curation_And_Rules.xlsx
+
+  civic:
+    code_dir: external/CivicAnnotator
+    data_dir: external/CivicAnnotator/data
+    database: external/CivicAnnotator/data/01-Jan-2022-ClinicalEvidenceSummaries_Annotated.xlsx
+    rules_clean: external/CivicAnnotator/data/CIViC_Curation_And_Rules_Mutation.xlsx
+
+
+filepaths:
+  base: ../../../data
+  yaml: ../../../data/organisation/DATA_ORGANISATION.yaml

@@ -1,0 +1,61 @@
+# @created: 14 Oct 2021
+# @modified: 02 Jan 2023
+# @uthor: Yoann Pradat
+#
+# This pipeline prepares a series of plots for presenting the data.
+
+include: "rules/common.smk"
+
+##### Target rules #####
+
+rule all:
+    input:
+        expand("%s/tumor_types/donut_plot_tumor_types_{cohort}.svg" % R_FOLDER,
+            cohort=config["tumor_types"]["cohorts"]),
+        expand("%s/tumor_types/bar_chart_tumor_types_sample_types_{cohort}.svg" % R_FOLDER,
+            cohort=config["tumor_types"]["cohorts"]),
+        "%s/tumor_types/bar_chart_tumor_types_sample_types_all_cohorts.svg" % R_FOLDER,
+        expand("%s/tumor_types/bar_chart_rare_histological_types_{cohort}.svg" % R_FOLDER,
+            cohort=["prism", "met500"]),
+        ["%s/treatments/sankeys/sankey_tumor_type_drug_%s_prism.svg" % (R_FOLDER,x) for x in ["name", "class"]],
+        expand("%s/treatments/barplots/{tumor_type}/trt_classes.pdf" % R_FOLDER,
+            tumor_type=config["treatments"]["barplots"]["description"]["tumor_types"]),
+        expand("%s/treatments/barplots/{tumor_type}/trt_name_vs_histologies_prism.pdf" % R_FOLDER,
+            tumor_type=config["treatments"]["barplots"]["resistance"]["tumor_types"]),
+        ["%s/metastatic_sites/table_extra_met_sites_%s_tt.pdf" % (R_FOLDER, x) for x in ["all", "sel"]],
+        expand("%s/treatments/forester/{tumor_type}/{drug}_{tumor_type}_clinical.pdf" % R_FOLDER,
+            drug=config["treatments"]["forester_1"]["drugs"],
+            tumor_type=config["treatments"]["forester_1"]["tumor_types"]),
+        expand("%s/treatments/forester/{tumor_type}/{drug}_{tumor_type}.pdf" % R_FOLDER,
+            drug=config["treatments"]["forester_2"]["drugs"],
+            tumor_type=config["treatments"]["forester_2"]["tumor_types"]),
+        expand(["%s/treatments/heatmaps/table_extra_drugs_{col_row}_%s_tt.pdf" % (R_FOLDER, x) for x in ["all", "sel"]],
+                col_row=["Drugs_Before_Biopsy", "Classes_Before_Biopsy"]),
+        #### PAPER FIGURES ####
+        "%s/F1a_left.svg" % F_FOLDER,
+        "%s/F1a_right.svg" % F_FOLDER,
+        "%s/F1b.svg" % F_FOLDER,
+        "%s/F1c.eps" % F_FOLDER,
+        "%s/F1d_Drugs_Before_Biopsy.pdf" % F_FOLDER,
+        "%s/F2b_mid.svg" % F_FOLDER,
+        "%s/FS1.pdf" % F_FOLDER,
+        "%s/FS2.pdf" % F_FOLDER,
+        "%s/FS3a.pdf" % F_FOLDER,
+        "%s/FS3b.pdf" % F_FOLDER,
+        "%s/FS3c.pdf" % F_FOLDER,
+        "%s/FS3d.pdf" % F_FOLDER,
+
+##### Modules #####
+
+include: "../../common/rules/setup.smk"
+include: "rules/tumor_types.smk"
+include: "rules/treatments.smk"
+include: "rules/miscellaneous.smk"
+
+##### End messages #####
+
+onsuccess:
+    print("Workflow finished, no error")
+
+onerror:
+    print("An error occurred")

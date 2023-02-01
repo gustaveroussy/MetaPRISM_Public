@@ -1,0 +1,45 @@
+# @author: Yoann Pradat
+#
+# This pipeline runs an exhaustive mutational signature analysis on WES samples for all three cohorts META-PRISM,
+# MET500, and TCGA.
+
+include: "rules/common.smk"
+
+##### Target rules #####
+
+rule all:
+    input:
+        expand("%s/counts_mutations/counts_mutations_{mmode}_min_mut_{cohort}.tsv" % R_FOLDER,
+                mmode=config["count"]["mmode"], cohort=config["data"]["cohorts"]),
+        expand("%s/counts_mutations/counts_mutations_{mmode}_min_mut_high_vaf_{cohort}.tsv" % R_FOLDER,
+                mmode=config["count"]["mmode"], cohort=config["data"]["cohorts"]),
+        expand("%s/projection_known_signatures/{pkg}/counts_signatures_{basis}_{mmode}_{cmode}_{cohort}.tsv" % R_FOLDER,
+                pkg=config["projection"]["pkgs"], basis=config["projection"]["bases"],
+                mmode=config["projection"]["mmodes"], cmode=config["projection"]["cmodes"],
+                cohort=config["data"]["cohorts"]),
+        expand("%s/projection_known_signatures/{pkg}/counts_signatures_{basis}_{mmode}_{cmode}_sparse_sigprofilerjulia_{cohort}.tsv" % R_FOLDER,
+                pkg="MutationalPatterns", basis=config["projection"]["bases"],
+                mmode=config["projection"]["mmodes"], cmode=config["projection"]["cmodes"],
+                cohort=config["data"]["cohorts"]),
+        #### FIGURES PAPER ####
+        "%s/F2b_top.pdf" % F_FOLDER,
+        "%s/F2b_bot.pdf" % F_FOLDER,
+        "%s/FS4a.pdf" % F_FOLDER,
+        "%s/FS4b.pdf" % F_FOLDER
+
+
+##### Modules #####
+
+include: "../../common/rules/setup.smk"
+include: "../../common/rules/selection.smk"
+include: "rules/count.smk"
+include: "rules/projection.smk"
+include: "rules/associations.smk"
+
+##### End messages #####
+
+onsuccess:
+    print("Workflow finished, no error")
+
+onerror:
+    print("An error occurred")

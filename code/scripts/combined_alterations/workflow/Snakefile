@@ -1,0 +1,61 @@
+# @created: 15 Sep 2021
+# @modified: 02 Jan 2023
+# @uthor: Yoann Pradat
+#
+# This pipeline combines alterations (mutations, copy-number, fusions) annotated in OncoKB (https://www.oncokb.org/)
+# and/or CIViC database (https://civicdb.org/home) and draws all the plots that combine 2 types of data or more from 
+# META-PRISM, MET500, and TCGA.
+
+include: "rules/common.smk"
+
+##### Target rules #####
+
+rule all:
+    input:
+        expand("%s/selection/selection_samples_{cohort}.tsv" % R_FOLDER, cohort=config["data"]["cohorts"]),
+        #### ALTERATIONS ####
+        expand("%s/alterations/aggregated_alterations_{cohort}.tsv" % R_FOLDER, cohort=config["data"]["cohorts"]),
+        expand("%s/alterations/aggregated_alterations_{cohort}_all.tsv" % R_FOLDER, cohort=config["data"]["cohorts"]),
+        expand("%s/alterations/aggregated_alterations.tsv" % R_FOLDER),
+        #### HEATMAPS ####
+        expand("%s/heatmap_all/heatmap_{direction}.pdf" % R_FOLDER, direction=["sensitivity", "resistance"]),
+        expand("%s/heatmap_dna/heatmap_{gene_type}.svg" % R_FOLDER, gene_type=["oncogenes", "tumorsuppressors"]),
+        #### ONCOPLOTS ####
+        expand("%s/oncoplots/oncoplot_{cohort}_{tumor_type}_WES.pdf" % R_FOLDER,
+                cohort=["prism"], tumor_type=config["oncoplot"]["tumor_types"]),
+        #### OTHER PLOTS ####
+        expand("%s/other_plots/sankey_levels_{cohort}.svg" % R_FOLDER, cohort=["prism"]),
+        expand("%s/other_plots/violins_drivers_dna.pdf" % R_FOLDER),
+        expand("%s/other_plots/barplot_multihits_{gene_type}.pdf" % R_FOLDER,
+            gene_type=["oncogenes", "tumorsuppressors"]),
+        # #### COUNT TABLES ####
+        expand("%s/count/count_by_gene_{data_type}_annotated_{cohort}.tsv" % R_FOLDER,
+            data_type=["DNA", "DNA_RNA"], cohort=["prism", "tcga"]),
+        expand("%s/count/count_by_pathway_{pathway}_{data_type}_annotated_{cohort}.tsv" % R_FOLDER,
+            pathway=list(config["count"]["pathways"].keys()), data_type=["DNA", "DNA_RNA"], cohort=["prism", "tcga"]),
+        expand("%s/count/count_total_{data_type}_annotated_{cohort}.tsv" % R_FOLDER,
+            data_type=["DNA", "DNA_RNA"], cohort=["prism", "tcga"]),
+        #### PAPER FIGURES ####
+        expand("%s/F3a_{gene_type}.svg" % F_FOLDER, gene_type=["oncogenes", "tumorsuppressors"]),
+        expand("%s/F3b.eps" % F_FOLDER),
+        expand("%s/F5_{direction}.pdf" % F_FOLDER, direction=["resistance", "sensitivity"]),
+        expand("%s/FS12_13_{gene_type}_{tumor_type}.pdf" % F_FOLDER
+            gene_type=["oncogenes", "tumorsuppressors"], tumor_type=["All", "BLCA", "BRCA", "LUAD", "PAAD", "PRAD"]),
+
+##### Modules #####
+
+include: "../../common/rules/setup.smk"
+include: "../../common/rules/selection.smk"
+include: "rules/aggregate.smk"
+include: "rules/heatmap.smk"
+include: "rules/oncoplot.smk"
+include: "rules/plots.smk"
+include: "rules/count.smk"
+
+##### End messages #####
+
+onsuccess:
+    print("Workflow finished, no error")
+
+onerror:
+    print("An error occurred")

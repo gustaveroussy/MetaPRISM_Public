@@ -1,0 +1,64 @@
+# @created: 25 Jun 2021
+# @modified: 02 Jan 2023
+# @uthor: Yoann Pradat
+#
+# This pipeline runs an exhaustive analysis of gene fusions using gene expression tables for all three cohorts
+# META-PRISM, MET500, and TCGA.
+
+include: "rules/common.smk"
+
+##### Target rules #####
+
+rule all:
+    input:
+        expand("%s/{cohort}/rna/{algo}/{cohort}_{algo}.tsv.gz" % D_FOLDER, get_allowed_doublets_cohort_algo(),
+              cohort=COHORTS_NOT_TCGA, algo=ALGOS),
+        expand("%s/{cohort}/rna/fusions/{cohort}_annotated.tsv.gz" % D_FOLDER,
+              cohort=COHORTS),
+        expand("%s/{cohort}/rna/fusions/{cohort}_annotated_filtered.tsv.gz" % D_FOLDER,
+              cohort=COHORTS),
+        expand("%s/validation/upset_samples_{cohort}.pdf" % R_FOLDER, cohort=["tcga", "tcga_validation"]),
+        expand("%s/validation/upset_callers_wo_breakpoints_all_{cohort}.pdf" % R_FOLDER,
+              cohort=["tcga", "tcga_validation"]),
+        expand("%s/validation/upset_callers_wo_breakpoints_com_{cohort}.pdf" % R_FOLDER,
+              cohort=["tcga", "tcga_validation"]),
+        expand("%s/validation/upset_callers_w_breakpoints_all_{cohort}.pdf" % R_FOLDER,
+              cohort=["tcga", "tcga_validation"]),
+        expand("%s/validation/upset_callers_w_breakpoints_com_{cohort}.pdf" % R_FOLDER,
+              cohort=["tcga", "tcga_validation"]),
+        expand("%s/validation/table_scores_use_whitelist_{whitelist}_use_breakpoints_{breakpoints}.tsv" % R_FOLDER,
+              whitelist=["yes", "no"], breakpoints=["yes", "no"]),
+        expand("%s/{cohort}/rna/fusions/{cohort}_annotated_filtered_oncokb.tsv.gz" % D_FOLDER,
+              cohort=COHORTS_NOT_VAL),
+        expand("%s/{cohort}/rna/fusions/{cohort}_annotated_filtered_civic.tsv.gz" % D_FOLDER,
+              cohort=COHORTS_NOT_VAL),
+        expand("%s/{cohort}/rna/fusions/{cohort}_annotated_filtered_union_ann.tsv.gz" % D_FOLDER,
+              cohort=COHORTS_NOT_VAL),
+        expand("%s/selection/selection_samples_{cohort}.tsv" % R_FOLDER, cohort=config["selection"]["cohorts"]),
+        "%s/plots/plot_burden_tumor_types_all.pdf" % R_FOLDER,
+        "%s/plots/plot_burden_tumor_types_sel.pdf" % R_FOLDER,
+        expand("%s/count/count_total_RNA_all_{cohort}.tsv" % R_FOLDER, cohort=config["selection"]["cohorts"]),
+        #### HEATMAP ####
+        expand("%s/heatmap/heatmap_{gene_type}.pdf" % R_FOLDER, gene_type=["fusions", "genes"]),
+        #### PAPER FIGURES ####
+        "%s/F4b_fusions.svg" % F_FOLDER,
+        "%s/F4b_genes.svg" % F_FOLDER
+
+##### Modules #####
+
+include: "../../common/rules/setup.smk"
+include: "../../common/rules/selection.smk"
+include: "rules/data.smk"
+include: "rules/validation.smk"
+include: "rules/burden.smk"
+include: "rules/heatmap.smk"
+include: "rules/count.smk"
+
+
+# END ==================================================================================================================
+
+onsuccess:
+    print("Workflow finished, no error")
+
+onerror:
+    print("An error occurred")

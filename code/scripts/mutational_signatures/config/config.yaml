@@ -1,0 +1,76 @@
+setup:
+  MetaPrism: ../../../common/envs/MetaPrism.yaml
+  Signatures: ../../../common/envs/Signatures.yaml
+
+filepaths:
+  base: ../../../data
+  yaml: ../../../data/organisation/DATA_ORGANISATION.yaml
+
+data:
+  cohorts:
+    - met500
+    - prism
+    - tcga
+
+  cln:
+    met500: ../../../data/met500/clinical/curated/cln_met500_in_design_curated.tsv
+    prism: ../../../data/prism/clinical/curated/cln_prism_in_design_curated.tsv
+    tcga: ../../../data/tcga/clinical/curated/cln_tcga_in_design_curated.tsv
+
+  mut:
+    met500: ../../../data/met500/wes/somatic_maf/somatic_calls.maf.gz
+    prism: ../../../data/prism/wes/somatic_maf/somatic_calls.maf.gz
+    tcga: ../../../data/tcga/wes/somatic_maf/somatic_calls.maf.gz
+
+  mut_sum:
+    met500: ../../../data/met500/wes/summary/somatic_maf.tsv
+    prism: ../../../data/prism/wes/summary/somatic_maf.tsv
+    tcga: ../../../data/tcga/wes/summary/somatic_maf.tsv
+
+  resources:
+    bases:
+      cosmic_sbs_96_v3.2: resources/signatures_cosmic/signatures_cosmic_sbs_96_v3.2.tsv
+    aetiologies:
+      cosmic_sbs_96_v3.2: resources/signatures_cosmic/signatures_cosmic_aetiologies_v3.2.tsv
+
+
+selection:
+  cohorts:
+    - met500
+    - prism
+    - tcga
+  col_tt: Project_TCGA_More
+  sample_types: 
+    - DNA_T__DNA_N
+  algos:
+    DNA_T__DNA_N:
+      - somatic_maf
+  tt_keep_min_sizes:
+    plotting: 10
+  tt_keeps:
+    plotting: null
+  tt_drops:
+    plotting:
+      - MISC
+      - Unknown_Primary
+      - "N/A"
+
+count:
+  mmode: sbs_96
+  mutation_min_per_tumor: 50
+
+projection:
+  bases:
+    - cosmic_sbs_96_v3.2
+  cmodes:
+    - min_mut
+    - min_mut_low_vaf
+    - min_mut_high_vaf
+  mmodes: 
+    - sbs_96
+  pkgs:
+    - MutationalPatterns
+    - deconstructSigs
+    - MutationalCone
+
+  sigprofilerjulia: external/sigprofilerjulia

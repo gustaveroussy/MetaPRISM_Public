@@ -1,0 +1,1644 @@
+# @modified: 05 Jul 21
+# @modified: 21 Oct 22
+# @authors: Yoann Pradat
+
+suppressPackageStartupMessages(library(argparse))
+suppressPackageStartupMessages(library(data.table))
+suppressPackageStartupMessages(library(dplyr))
+suppressPackageStartupMessages(library(maftools))
+suppressPackageStartupMessages(library(rprism))
+suppressPackageStartupMessages(library(rprismtools))
+suppressPackageStartupMessages(library(readr))
+suppressPackageStartupMessages(library(tidyr))
+
+# functions ============================================================================================================
+
+# Copied from source code of maftools
+# Layout for oncoplot
+plot_layout <- function(clinicalFeatures = NULL, drawRowBar = TRUE, drawColBar = TRUE, draw_titv = FALSE,
+                        exprsTbl = NULL, col_bar_height = 4, legend_height = 4, titv_height = 4, anno_height = 1){
+
+  if(is.null(clinicalFeatures)){
+    if(draw_titv){
+      if(!drawRowBar & !drawColBar){
+        if(is.null(exprsTbl)){
+          mat_lo = matrix(data = c(1,2,3,rep(0,3)), nrow = 3, ncol = 2, byrow = FALSE)
+          lo = list(mat=mat_lo, heights = c(12, titv_height, legend_height), widths = c(4,0.5))
+        }else{
+          mat_lo = matrix(data = c(1,2,3,4,0,5), nrow = 3, ncol = 2, byrow = TRUE)
+          lo = list(mat=mat_lo, heights = c(12, titv_height, legend_height), widths = c(1, 4))
+        }
+      }else if(!drawRowBar){
+        if(is.null(exprsTbl)){
+          mat_lo = matrix(data = c(1,2,3,4,rep(0,4)), nrow = 4, ncol = 2, byrow = FALSE)
+          lo = list(mat=mat_lo, heights = c(col_bar_height, 12, titv_height, legend_height), widths = c(4, 0.5))
+        }else{
+          mat_lo = matrix(data = c(1,2,3,4,5,6,0,7), nrow = 4, ncol = 2, byrow = TRUE)
+          lo = list(mat=mat_lo, heights = c(col_bar_height, 12, titv_height, legend_height), widths = c(1, 4))
+        }
+      }else if(!drawColBar){
+        if(is.null(exprsTbl)){
+          mat_lo = matrix(data = c(1,2,3,4,5,5), nrow = 3, ncol = 2, byrow = TRUE)
+          lo = list(mat=mat_lo, heights = c(12, titv_height, legend_height), widths = c(4, 1))
+        }else{
+          mat_lo = matrix(data = c(1,2,3,4,5,6,0,7,7), nrow = 3, ncol = 3, byrow = TRUE)
+          lo = list(mat=mat_lo, heights = c(12, titv_height, legend_height), widths = c(1, 4, 1))
+        }
+      }else{
+        if(is.null(exprsTbl)){
+          mat_lo = matrix(data = c(1,2,3,4,5,6,7,7), nrow = 4, ncol = 2, byrow = TRUE)
+          lo = list(mat=mat_lo, widths = c(4, 1), heights = c(col_bar_height, 12, titv_height, legend_height))
+        }else{
+          mat_lo = matrix(data = c(1,2,3,4,5,6,7,8,9,0,10,10), nrow = 4, ncol = 3, byrow = TRUE)
+          lo = list(mat=mat_lo, widths = c(1,4,1), heights = c(col_bar_height, 12, titv_height, legend_height))
+        }
+      }
+    }else{
+      if(!drawRowBar & !drawColBar){
+        if(is.null(exprsTbl)){
+          mat_lo = matrix(data = c(1,2,rep(0,2)), nrow = 2, ncol = 2, byrow = FALSE)
+          lo = list(mat=mat_lo, heights = c(12, legend_height), widths = c(4, 0.5))
+        }else{
+          mat_lo = matrix(data = c(1,2,0,3), nrow = 2, ncol = 2, byrow = TRUE)
+          lo = list(mat=mat_lo, heights = c(12, legend_height), widths = c(1, 4))
+        }
+      }else if(!drawRowBar){
+        if(is.null(exprsTbl)){
+          mat_lo = matrix(data = c(1,2,3,rep(0,3)), nrow = 3, ncol = 2, byrow = FALSE)
+          lo = list(mat=mat_lo, heights = c(col_bar_height, 12, legend_height), widths = c(4, 0.5))
+        }else{
+          mat_lo = matrix(data = c(1,2,3,4,0,5), nrow = 3, ncol = 2, byrow = TRUE)
+          lo = list(mat=mat_lo, heights = c(col_bar_height, 12, legend_height), widths = c(1, 4))
+        }
+      }else if(!drawColBar){
+        if(is.null(exprsTbl)){
+          mat_lo = matrix(data = c(1,2,3,3), nrow = 2, ncol = 2, byrow = TRUE)
+          lo = list(mat=mat_lo, heights = c(12, legend_height), widths = c(4, 1))
+        }else{
+          mat_lo = matrix(data = c(1,2,3,0,4,4), nrow = 2, ncol = 3, byrow = TRUE)
+          lo = list(mat=mat_lo, heights = c(12, legend_height), widths = c(1, 4, 1))
+        }
+      }else{
+        if(is.null(exprsTbl)){
+          mat_lo = matrix(data = c(1,2,3,4,5,5), nrow = 3, ncol = 2, byrow = TRUE)
+          lo = list(mat=mat_lo, widths = c(4, 1), heights = c(col_bar_height, 12, legend_height))
+        }else{
+          mat_lo = matrix(data = c(1,2,3,4,5,6,0,7,7), nrow = 3, ncol = 3, byrow = TRUE)
+          lo = list(mat=mat_lo, widths = c(1, 4, 1), heights = c(col_bar_height, 12, legend_height))
+        }
+      }
+    }
+  }else{
+    if(draw_titv){
+      if(!drawRowBar & !drawColBar){
+        if(is.null(exprsTbl)){
+          mat_lo = matrix(data = c(1,2,3,4,rep(0,4)), nrow = 4, ncol = 2, byrow = FALSE)
+          lo = list(mat=mat_lo, heights = c(12, anno_height, titv_height, legend_height), widths = c(4, 0.5))
+        }else{
+          mat_lo = matrix(data = c(1,2,3,4,5,6,0,7), nrow = 4, ncol = 2, byrow = TRUE)
+          lo = list(mat=mat_lo, heights = c(12, anno_height, titv_height, legend_height), widths = c(1, 4))
+        }
+      }else if(!drawRowBar){
+        if(is.null(exprsTbl)){
+          mat_lo = matrix(data = c(1,2,3,4,5,rep(0,5)), nrow = 5, ncol = 2, byrow = FALSE)
+          lo = list(mat=mat_lo, heights = c(col_bar_height, 12, anno_height, titv_height, legend_height),
+                    widths = c(4, 0.5))
+        }else{
+          mat_lo = matrix(data = c(1,2,3,4,5,6,7,8,0,9), nrow = 5, ncol = 2, byrow = TRUE)
+          lo = list(mat=mat_lo, heights = c(col_bar_height, 12, anno_height, titv_height, legend_height),
+                    widths = c(1, 4))
+        }
+      }else if(!drawColBar){
+        if(is.null(exprsTbl)){
+          mat_lo = matrix(data = c(1,2,3,4,5,6,7,7), nrow = 4, ncol = 2, byrow = TRUE)
+          lo = list(mat=mat_lo, heights = c(12, anno_height, titv_height, legend_height), widths = c(4, 1))
+        }else{
+          mat_lo = matrix(data = c(1,2,3,4,5,6,7,8,9,0,10,10), nrow = 4, ncol = 3, byrow = TRUE)
+          lo = list(mat=mat_lo, heights = c(12, anno_height, titv_height, legend_height), widths = c(1, 4, 1))
+        }
+      }else{
+        if(is.null(exprsTbl)){
+          mat_lo = matrix(data = c(1,2,3,4,5,6,7,8,9,9), nrow = 5, ncol = 2, byrow = TRUE)
+          lo = list(mat=mat_lo, widths = c(4, 1),
+                    heights = c(col_bar_height, 12, anno_height, titv_height, legend_height))
+        }else{
+          mat_lo = matrix(data = c(1,2,3,4,5,6,7,8,9,10,11,12,0,13,13), nrow = 5, ncol = 3, byrow = TRUE)
+          lo = list(mat=mat_lo, widths = c(1, 4, 1),
+                    heights=c(col_bar_height, 12, anno_height, titv_height, legend_height))
+        }
+      }
+    }else{
+      if(!drawRowBar & !drawColBar){
+        if(is.null(exprsTbl)){
+          mat_lo = matrix(data = c(1,2,3,rep(0,3)), nrow = 3, ncol = 2, byrow = FALSE)
+          lo = list(mat=mat_lo, heights = c(12, anno_height, legend_height), widths = c(4, 0.5))
+        }else{
+          mat_lo = matrix(data = c(1,2,3,4,5,5), nrow = 3, ncol = 2, byrow = TRUE)
+          lo = list(mat=mat_lo, heights = c(12, anno_height, legend_height), widths = c(1, 4))
+        }
+      }else if(!drawRowBar){
+        if(is.null(exprsTbl)){
+          mat_lo = matrix(data = c(1,2,3,4,rep(0,4)), nrow = 4, ncol = 2, byrow = FALSE)
+          lo = list(mat=mat_lo, heights = c(col_bar_height, 12, anno_height, legend_height), widths = c(4, 0.5))
+        }else{
+          mat_lo = matrix(data = c(1,2,3,4,5,6,7,7), nrow = 4, ncol = 2, byrow = TRUE)
+          lo = list(mat=mat_lo, heights = c(col_bar_height, 12, anno_height, legend_height), widths = c(1, 4))
+        }
+      }else if(!drawColBar){
+        if(is.null(exprsTbl)){
+          mat_lo = matrix(data = c(1,2,3,4,5,5), nrow = 3, ncol = 2, byrow = TRUE)
+          lo = list(mat=mat_lo, heights = c(12, anno_height, legend_height), widths = c(4, 1))
+        }else{
+          mat_lo = matrix(data = c(1,2,3,4,5,6,0,7,7), nrow = 3, ncol = 3, byrow = TRUE)
+          lo = list(mat=mat_lo, heights = c(12, anno_height, legend_height), widths = c(1, 4, 1))
+        }
+      }else{
+        if(is.null(exprsTbl)){
+          mat_lo = matrix(data = c(1,2,3,4,5,6,7,7), nrow = 4, ncol = 2, byrow = TRUE)
+          lo = list(mat=mat_lo, widths = c(4, 1), heights = c(col_bar_height, 12, anno_height, legend_height))
+        }else{
+          mat_lo = matrix(data = c(1,2,3,4,5,6,7,8,9,0,10,10), nrow = 4, ncol = 3, byrow = TRUE)
+          lo = list(mat=mat_lo, widths = c(1, 4, 1), heights = c(col_bar_height, 12, anno_height, legend_height))
+        }
+      }
+    }
+  }
+
+  lo
+}
+
+
+#' Draw an oncoplot
+#' @description takes output generated by read.maf and draws an oncoplot
+#'
+#' @details
+#' Takes maf file as input and plots it as a matrix. Any desired clincal features can be added at the bottom of the oncoplot by providing \code{clinicalFeatures}.
+#' Oncoplot can be sorted either by mutations or by clinicalFeatures using arguments \code{sortByMutation} and \code{sortByAnnotation} respectively.
+#'
+#'
+#' @param maf an \code{\link{MAF}} object generated by \code{\link{read.maf}}
+#' @param top how many top genes to be drawn. defaults to 20.
+#' @param minMut draw all genes with `min` number of mutations. Can be an integer or fraction (of samples mutated), Default NULL
+#' @param genes Just draw oncoplot for these genes. Default NULL.
+#' @param altered Default FALSE. Chooses top genes based on muatation status. If \code{TRUE} chooses top genes based alterations (CNV or mutation).
+#' @param drawColBar logical plots top barplot for each sample. Default \code{TRUE}.
+#' @param drawRowBar logical. Plots righ barplot for each gene. Default \code{TRUE}.
+#' @param leftBarData Data for leftside barplot. Must be a data.frame with two columns containing gene names and values. Default `NULL`
+#' @param leftBarLims limits for `leftBarData`. Default `NULL`.
+#' @param topBarData Default `NULL` which draws absolute number of mutation load for each sample. Can be overridden by choosing one clinical indicator(Numeric) or by providing a two column data.frame contaning sample names and values for each sample. This option is applicable when only `drawColBar` is TRUE.
+#' @param rightBarData Data for rightside barplot. Must be a data.frame with two columns containing to gene names and values. Default `NULL` which draws distibution by variant classification. This option is applicable when only `drawRowBar` is TRUE.
+#' @param rightBarLims limits for `rightBarData`. Default `NULL`.
+#' @param logColBar Plot top bar plot on log10 scale. Default \code{FALSE}.
+#' @param includeColBarCN Whether to include CN in column bar plot. Default TRUE
+#' @param clinicalFeatures columns names from `clinical.data` slot of \code{MAF} to be drawn in the plot. Dafault NULL.
+#' @param annotationColor  Custom colors to use for `clinicalFeatures`. Must be a named list containing a named vector of colors. Default NULL. See example for more info.
+#' @param annotationDat If MAF file was read without clinical data, provide a custom \code{data.frame} with a column \code{Tumor_Sample_Barcode} containing sample names along with rest of columns with annotations.
+#' You can specify which columns to be drawn using `clinicalFeatures` argument.
+#' @param pathways Default `NULL`. Can be `auto`, or a two column data.frame/tsv-file with genes and correspoding pathway mappings.`
+#' @param path_order Default `NULL` Manually specify the order of pathways
+#' @param selectedPathways Manually provide the subset of pathway names to be selected from `pathways`. Default NULL. In case `pathways` is `auto` draws top 3 altered pathways.
+#' @param pwLineCol Color for the box around the pathways Default #535c68
+#' @param pwLineWd Line width for the box around the pathways Default Default 1
+#' @param draw_titv logical Includes TiTv plot. \code{FALSE}
+#' @param titv_col named vector of colors for each transition and transversion classes. Should be of length six with the names "C>T" "C>G" "C>A" "T>A" "T>C" "T>G".  Default NULL.
+#' @param showTumorSampleBarcodes logical to include sample names.
+#' @param barcode_mar Margin width for sample names. Default 4
+#' @param barcodeSrt Rotate sample labels. Default 90.
+#' @param gene_mar Margin width for gene names. Default 5
+#' @param col_bar_height Height of plotting area for top col bar. Default 4
+#' @param anno_height Height of plotting area for sample annotations. Default 1
+#' @param legend_height Height of plotting area for legend. Default 4
+#' @param titv_height Height of plotting area for titv plot. Default 4
+#' @param sortByAnnotation logical sort oncomatrix (samples) by provided `clinicalFeatures`. Sorts based on first `clinicalFeatures`.  Defaults to FALSE. column-sort
+#' @param groupAnnotationBySize Further group `sortByAnnotation` orders by their size.  Defaults to TRUE. Largest groups comes first.
+#' @param annotationOrder Manually specify order for annotations. Works only for first `clinicalFeatures`. Default NULL.
+#' @param sortByMutation Force sort matrix according mutations. Helpful in case of MAF was read along with copy number data. Default FALSE.
+#' @param keepGeneOrder logical whether to keep order of given genes. Default FALSE, order according to mutation frequency
+#' @param GeneOrderSort logical this is applicable when `keepGeneOrder` is TRUE. Default TRUE
+#' @param sampleOrder Manually speify sample names for oncolplot ordering. Default NULL.
+#' @param genesToIgnore do not show these genes in Oncoplot. Default NULL.
+#' @param removeNonMutated Logical. If \code{TRUE} removes samples with no mutations in the oncoplot for better visualization. Default \code{TRUE}.
+#' @param fill Logical. If \code{TRUE} draws genes and samples as blank grids even when they are not altered.
+#' @param cohortSize Number of sequenced samples in the cohort. Default all samples from Cohort. You can manually specify the cohort size. Default \code{NULL}
+#' @param colors named vector of colors for each Variant_Classification.
+#' @param cBioPortal Adds annotations similar to cBioPortals MutationMapper and collapse Variants into Truncating and rest.
+#' @param bgCol Background grid color for wild-type (not-mutated) samples. Default gray - "#CCCCCC"
+#' @param borderCol border grid color (not-mutated) samples. Default 'white'.
+#' @param annoBorderCol border grid color for annotations. Default NA.
+#' @param numericAnnoCol color palette used for numeric annotations. Default 'YlOrBr' from RColorBrewer
+#' @param drawBox logical whether to draw a box around main matrix. Default FALSE
+#' @param fontSize font size for gene names. Default 0.8.
+#' @param SampleNamefontSize font size for sample names. Default 1
+#' @param titleFontSize font size for title. Default 1.5
+#' @param legendFontSize font size for legend. Default 1.2
+#' @param annotationFontSize font size for annotations. Default 1.2
+#' @param sepwd_genes size of lines seperating genes. Default 0.5
+#' @param sepwd_samples size of lines seperating samples. Default 0.25
+#' @param writeMatrix writes character coded matrix used to generate the plot to an output file.
+#' @param colbar_pathway Draw top column bar with respect to diplayed pathway. Default FALSE.
+#' @param showTitle Default TRUE
+#' @param titleText Custom title. Default `NULL`
+#' @param digitsPct Float precision of percentages. Default 1.
+#' @param showPct Default TRUE. Shows percent altered to the right side of the plot.
+#' @param pct_mar Margin width for percentages. Default 2.
+#' @param colBarTitle Y-axis title for col bar if drawColBar is TRUE. Default NULL.
+#' @param colBarHlineHeight If not NULL, a dashed horizontal line will be drawn at this height Default NULL.
+#' @param colBarHlineLabel If not NULL, label for the dashed horizontal line. Default NULL.
+#' @param colBarHlineLabelPos If not NULL, x and y positions of the label for the dashed horizontal line. Default NULL.
+#' @param colBarHlineLabelAdj If not NULL, text alignment of label for the dashed horizontal line. Default NULL.
+#' @param legend_n_items_max_per_col Maximum number of items per column of the legend.
+#' @return None.
+#' @examples
+#' laml.maf <- system.file("extdata", "tcga_laml.maf.gz", package = "maftools")
+#' laml.clin = system.file('extdata', 'tcga_laml_annot.tsv', package = 'maftools')
+#' laml <- read.maf(maf = laml.maf, clinicalData = laml.clin)
+#' #Basic oncoplot
+#' oncoplot(maf = laml, top = 3)
+#' #Changing colors for variant classifications (You can use any colors, here in this example we will use a color palette from RColorBrewer)
+#' col = RColorBrewer::brewer.pal(n = 8, name = 'Paired')
+#' names(col) = c('Frame_Shift_Del','Missense_Mutation', 'Nonsense_Mutation', 'Multi_Hit', 'Frame_Shift_Ins',
+#'                'In_Frame_Ins', 'Splice_Site', 'In_Frame_Del')
+#' #Color coding for FAB classification; try getAnnotations(x = laml) to see available annotations.
+#' fabcolors = RColorBrewer::brewer.pal(n = 8,name = 'Spectral')
+#' names(fabcolors) = c("M0", "M1", "M2", "M3", "M4", "M5", "M6", "M7")
+#' fabcolors = list(FAB_classification = fabcolors)
+#' oncoplot(maf = laml, colors = col, clinicalFeatures = 'FAB_classification', sortByAnnotation = TRUE, annotationColor = fabcolors)
+#' @seealso \code{\link{oncostrip}}
+#' @export
+oncoplot <- function(maf, top = 20, minMut = NULL, genes = NULL, altered = FALSE,
+                     drawRowBar = TRUE, drawColBar = TRUE,
+                     leftBarData = NULL, leftBarLims = NULL,
+                     rightBarData = NULL, rightBarLims = NULL,
+                     topBarData = NULL, logColBar = FALSE, includeColBarCN = TRUE,
+                     clinicalFeatures = NULL, annotationColor = NULL, annotationDat = NULL,
+                     pathways = NULL, path_order = NULL, selectedPathways = NULL, pwLineCol = "#535c68", pwLineWd = 1,
+                     draw_titv = FALSE, titv_col = NULL, showTumorSampleBarcodes = FALSE, barcode_mar = 4, 
+                     barcodeSrt = 90, gene_mar = 5, col_bar_height = 4, anno_height = 1, legend_height = 4,
+                     titv_height = 4, sortByAnnotation = FALSE, groupAnnotationBySize = TRUE, annotationOrder = NULL,
+                     sortByMutation = FALSE, keepGeneOrder = FALSE, GeneOrderSort = TRUE, sampleOrder = NULL,
+                     genesToIgnore = NULL, removeNonMutated = TRUE, fill = TRUE,
+                     cohortSize = NULL, colors = NULL, cBioPortal = FALSE, bgCol = "#CCCCCC", borderCol = 'white',
+                     annoBorderCol = NA, numericAnnoCol = NULL, drawBox = FALSE, fontSize = 0.8, SampleNamefontSize = 1,
+                     titleFontSize = 1.5, legendFontSize = 1.2, annotationFontSize = 1.2, sepwd_genes = 0.5,
+                     sepwd_samples = 0.25, writeMatrix = FALSE, colbar_pathway = FALSE, showTitle = TRUE,
+                     titleText = NULL, showPct = TRUE, digitsPct = 1, pct_mar = 2, colBarTitle = NULL,
+                     legend_n_items_max_per_col = 5, colBarHlineHeight=NULL, colBarHlineLabel=NULL,
+                     colBarHlineLabelPos=NULL, colBarHlineLabelAdj=c(1,1)){
+
+
+  #Total samples
+  if(is.null(cohortSize)){
+    totSamps = as.numeric(maf@summary[3,summary])
+  }else{
+    totSamps = cohortSize
+  }
+
+  # trick to have Fusion shown as reduce-height rectangles similarly to CNV
+  vt_maf_original <- maf@data$Variant_Type
+  mask_maf_fusion <- maf@data$Variant_Classification %in% c("Fusion")
+  maf@data[mask_maf_fusion, "Variant_Type"] <- "CNV"
+
+  if(!is.null(genes)){ #If user provides a gene list
+    om = maftools:::createOncoMatrix(m = maf, g = genes, add_missing = fill, cbio = cBioPortal)
+    numMat = om$numericMatrix
+    mat_origin = om$oncoMatrix
+
+    if(!is.null(pathways)){
+      stop("Please use genes or pathways.")
+    }
+
+  } else if(!is.null(pathways)){ #If user provides pathway list
+
+    if(is(pathways, 'data.frame')){
+      pathways = data.table::copy(pathways)
+      colnames(pathways)[1:2] = c('Gene', 'Pathway')
+      data.table::setDT(x = pathways)
+      pathways = pathways[!duplicated(Gene)][,.(Gene, Pathway)]
+      if(!is.null(selectedPathways)){
+        pathways = pathways[Pathway %in% selectedPathways]
+      }
+    }else if(file.exists(pathways)){
+      pathways = data.table::fread(file = pathways)
+      colnames(pathways)[1:2] = c('Gene', 'Pathway')
+      data.table::setDT(x = pathways)
+      pathways = pathways[!duplicated(Gene)][,.(Gene, Pathway)]
+      if(!is.null(selectedPathways)){
+        pathways = pathways[Pathway %in% selectedPathways]
+      }
+    }else{
+      pathways = system.file("extdata", "BP_SMGs.txt.gz", package = "maftools")
+      pathways = data.table::fread(file = pathways, skip = "Gene")
+      pathways = pathways[!duplicated(Gene)][,.(Gene, Pathway)]
+      pathways$Pathway = gsub(pattern = " ", replacement = "_", x = pathways$Pathway)
+      pathwayLoad = pathway_load(maf = maf) #Get top mutated known pathways
+
+      if(is.null(selectedPathways)){
+        message("Drawing upto top 3 mutated pathways")
+        print(pathwayLoad)
+        if(ncol(pathwayLoad) >= 3){
+          pathways = pathways[Pathway %in% pathwayLoad[1:3, Pathway]]
+        }else{
+          pathways = pathways[Pathway %in% pathwayLoad[, Pathway]]
+        }
+      }else{
+        pathways = pathways[Pathway %in% selectedPathways]
+      }
+
+    }
+    genes = as.character(pathways$Gene)
+
+    om = maftools:::createOncoMatrix(m = maf, g = genes, cbio = cBioPortal)
+    numMat = om$numericMatrix
+    mat_origin = om$oncoMatrix
+
+    #Check for any missing genes and ignore them if necessary
+    if(length(genes[!genes %in% rownames(numMat)]) > 0){
+      #warning('Missing following genes from provided pathways ', paste(genes[!genes %in% rownames(numMat)], collapse =
+      #", "))
+      genes = genes[genes %in% rownames(numMat)]
+    }
+  }else if(!is.null(minMut)){
+    if(altered){
+      genes = getGeneSummary(x = maf)[order(AlteredSamples, decreasing = TRUE)][,.(Hugo_Symbol, AlteredSamples)]
+    }else{
+      genes = getGeneSummary(x = maf)[order(MutatedSamples, decreasing = TRUE)][,.(Hugo_Symbol, MutatedSamples)]
+    }
+    colnames(genes)[2] = "mutload"
+    genes[,fractMutated := mutload/totSamps]
+    if(minMut > 1){
+      genes = genes[mutload >= minMut, Hugo_Symbol]
+    }else{
+      genes = genes[fractMutated >= minMut, Hugo_Symbol]
+    }
+
+    om = maftools:::createOncoMatrix(m = maf, g = genes, cbio = cBioPortal)
+    numMat = om$numericMatrix
+    mat_origin = om$oncoMatrix
+  }else { #If user does not provide gene list or MutSig results, draw TOP (default 20) genes
+    if(altered){
+      genes = getGeneSummary(x = maf)[order(AlteredSamples, decreasing = TRUE)][1:top, Hugo_Symbol]
+    }else{
+      genes = getGeneSummary(x = maf)[1:top, Hugo_Symbol]
+    }
+    om = maftools:::createOncoMatrix(m = maf, g = genes, cbio = cBioPortal)
+    numMat = om$numericMatrix
+    mat_origin = om$oncoMatrix
+  }
+
+  #---remove genes from genesToIgnore if any
+  if(!is.null(genesToIgnore)){
+    numMat = numMat[!rownames(numMat) %in% genesToIgnore,]
+    mat_origin = mat_origin[!rownames(mat_origin) %in% genesToIgnore,]
+  }
+
+  tsbs = levels(getSampleSummary(x = maf)[,Tumor_Sample_Barcode])
+
+  if(!removeNonMutated){
+    tsb.include = matrix(data = 0, nrow = nrow(numMat),
+                         ncol = length(tsbs[!tsbs %in% colnames(numMat)]))
+    colnames(tsb.include) = tsbs[!tsbs %in% colnames(numMat)]
+    rownames(tsb.include) = rownames(numMat)
+    numMat = cbind(numMat, tsb.include)
+    mat_origin = cbind(mat_origin, tsb.include)
+  }
+
+  #If user wannts to keep given gene order
+  if(keepGeneOrder){
+    if(fill){
+      numMat = numMat[genes, , drop = FALSE]
+    }else{
+      if(GeneOrderSort){
+        numMat = maftools:::sortByGeneOrder(m = numMat, g = genes)
+      }else{
+        numMat = numMat[genes, , drop = FALSE]
+      }
+    }
+    mat = mat_origin[rownames(numMat), , drop = FALSE]
+    mat = mat[,colnames(numMat), drop = FALSE]
+  }
+
+  if(sortByMutation){
+    numMat_temp = maftools:::sortByMutation(numMat = numMat, maf = maf)
+    numMat = numMat[rownames(numMat_temp), colnames(numMat_temp), drop = FALSE]
+  }
+
+  samp_sum = data.table::copy(getSampleSummary(x = maf))
+  samp_sum$total <- NULL
+
+  if(cBioPortal){
+    samp_sum = data.table::melt(data = samp_sum, id.vars = "Tumor_Sample_Barcode")
+    colnames(samp_sum)[2] = "Variant_Classification"
+    vc = c("Nonstop_Mutation", "Frame_Shift_Del", "Missense_Mutation",
+           "Nonsense_Mutation", "Splice_Site", "Frame_Shift_Ins", "In_Frame_Del", "In_Frame_Ins")
+    vc.cbio = c("Truncating", "Truncating", "Missense", "Truncating", "Truncating", "Truncating",
+                "In-frame", "In-frame")
+    names(vc.cbio) = vc
+    samp_sum[,Variant_Classification_temp := vc.cbio[as.character(samp_sum$Variant_Classification)]]
+    samp_sum$Variant_Classification_temp = ifelse(test = is.na(samp_sum$Variant_Classification_temp),
+                                                  yes = as.character(samp_sum$Variant_Classification), 
+                                                  no = samp_sum$Variant_Classification_temp)
+    samp_sum[,Variant_Classification := as.factor(as.character(Variant_Classification_temp))]
+    samp_sum[,Variant_Classification_temp := NULL]
+    samp_sum = samp_sum[,sum(value), .(Tumor_Sample_Barcode, Variant_Classification)]
+    samp_sum = data.table::dcast(data = samp_sum, formula = Tumor_Sample_Barcode~Variant_Classification, value.var = "V1")
+  }
+
+  if("CNV_total" %in% colnames(samp_sum)){
+    samp_sum$CNV_total <- NULL
+  }
+
+  if(!includeColBarCN){
+    suppressWarnings(samp_sum[,Amp := NULL])
+    suppressWarnings(samp_sum[,Del := NULL])
+  }
+  suppressMessages(data.table::setDF(x = samp_sum, rownames = as.character(samp_sum$Tumor_Sample_Barcode)))
+  samp_sum = samp_sum[,-1, drop = FALSE]
+
+  #Parse annotations
+  if(!is.null(clinicalFeatures)){
+    if(is.null(annotationDat)){
+      annotation = maftools:::parse_annotation_dat(annotationDat = maf, clinicalFeatures = clinicalFeatures)
+    }else{
+      annotation = maftools:::parse_annotation_dat(annotationDat = annotationDat, clinicalFeatures = clinicalFeatures)
+    }
+    annotation = annotation[colnames(numMat),, drop = FALSE]
+
+    if(sortByAnnotation){
+      numMat = maftools:::sortByAnnotation(numMat = numMat, maf = maf, anno = annotation, annoOrder = annotationOrder,
+                                           group = groupAnnotationBySize, isNumeric = FALSE) }
+  }
+
+  if(!is.null(sampleOrder)){
+    sampleOrder = as.character(sampleOrder)
+    sampleOrder = sampleOrder[sampleOrder %in% colnames(numMat)]
+    if(length(sampleOrder) == 0){
+      stop("None of the provided samples are present in the input MAF")
+    }
+    numMat = numMat[,sampleOrder, drop = FALSE]
+  }
+
+  gene_sum = apply(numMat, 1, function(x) length(x[x!=0]))
+  percent_alt = paste0(round(100*(apply(numMat, 1, function(x) length(x[x!=0]))/totSamps), digitsPct), "%")
+
+  nonmut_samps = colnames(numMat)[!colnames(numMat) %in% rownames(samp_sum)]
+  if(length(nonmut_samps) > 0){
+    samp_sum_missing_samps = matrix(data = 0, nrow = length(nonmut_samps), ncol = ncol(samp_sum))
+    colnames(samp_sum_missing_samps) = colnames(samp_sum)
+    rownames(samp_sum_missing_samps) = nonmut_samps
+    samp_sum = rbind(samp_sum, samp_sum_missing_samps)
+  }
+
+  if(colbar_pathway){
+    samp_sum = getSampleSummary(subsetMaf(maf = maf, genes = genes))
+    samp_sum[,total := NULL]
+    if("CNV_total" %in% colnames(samp_sum)){
+      samp_sum[,CNV_total := NULL]
+    }
+
+    if(!includeColBarCN){
+      suppressWarnings(samp_sum[,Amp := NULL])
+      suppressWarnings(samp_sum[,Del := NULL])
+    }
+    data.table::setDF(x = samp_sum, rownames = as.character(samp_sum$Tumor_Sample_Barcode))
+    samp_sum = samp_sum[,-1]
+    top_bar_data = t(samp_sum[colnames(numMat),, drop = FALSE])
+  }else{
+    top_bar_data = t(samp_sum[colnames(numMat),, drop = FALSE])
+  }
+
+  #VC codes
+  if(cBioPortal){
+    if(is.null(colors)){
+      vc_col = grDevices::adjustcolor(col = c("black", "#33A02C", "brown"), alpha.f = 0.7)
+      vc_col = c('Truncating' = vc_col[1], 'Missense' = vc_col[2], 'In-frame' = vc_col[3], "Multi_Hit" = "#9b59b6", "pathway" = "#d35400")
+    }else{
+      vc_col = colors
+      if(!"pathway" %in% names(vc_col)){
+        vc_col = c(vc_col, "pathway" = "#535C68FF")
+      }
+    }
+  }else{
+    if(is.null(colors)){
+      vc_col = maftools:::get_vcColors(websafe = FALSE)
+    }else{
+      vc_col = colors
+      if(!"pathway" %in% names(vc_col)){
+        vc_col = c(vc_col, "pathway" = "#535C68FF")
+      }
+    }
+  }
+
+  vc_codes = maftools:::update_vc_codes(om_op = om)
+  vc_col = maftools:::update_colors(x = vc_codes, y = vc_col)
+
+
+  if(nrow(numMat) == 1){
+    stop("Oncoplot requires at-least two genes for plottng.")
+  }
+
+  if(!is.null(pathways)){
+    vc_codes = c(vc_codes, '99' = 'pathway')
+
+    #Order genes in matrix by most frequently altered gene, followed by pathway size
+    temp_dat = data.table::data.table(Gene = rownames(numMat), percent_alt)
+    temp_dat = merge(temp_dat, pathways, all.x = TRUE)
+    temp_dat[is.na(temp_dat)] = "Unknown"
+    temp_dat$pct_alt = as.numeric(gsub(pattern = "%", replacement = "", x = temp_dat$percent_alt))
+    temp_dat = split(temp_dat, as.factor(as.character(temp_dat$Pathway)))
+
+    temp_dat_freq = lapply(temp_dat, function(x){
+      data.table::data.table(n = nrow(x), max_alt = max(x$pct_alt))
+    })
+    temp_dat_freq = data.table::rbindlist(l = temp_dat_freq, use.names = TRUE, fill = TRUE, idcol = "Pathway")
+    temp_dat_ord = temp_dat_freq[order(max_alt, n, decreasing = TRUE)][, Pathway]
+    temp_dat = lapply(temp_dat, function(x){x[order(pct_alt, decreasing = TRUE)]})[temp_dat_ord]
+
+    if("Unknown" %in% names(temp_dat)){
+      temp_dat_ord = c(grep(pattern = "Unknown", x = names(temp_dat), invert = TRUE, value = TRUE), "Unknown")
+      temp_dat = temp_dat[temp_dat_ord]
+    }
+
+    if(!is.null(path_order)){
+      path_order = intersect(x = path_order, names(temp_dat) )
+      temp_dat = temp_dat[path_order]
+      if(length(temp_dat) == 0){
+        stop("None of the pathways match the provided order!")
+      }
+    }
+
+    nm = lapply(seq_along(temp_dat), function(i){
+      x = numMat[temp_dat[[i]]$Gene,, drop = FALSE]
+      x = rbind(x, apply(x, 2, function(y) ifelse(test = sum(y) == 0, yes = 0, no = 99)))
+      rownames(x)[nrow(x)] = names(temp_dat)[i]
+      x
+    })
+    numMat = do.call(rbind, nm)
+
+    #Add pathway information to the character matrix
+    mat_origin_path = rownames(numMat)[!rownames(numMat) %in% rownames(mat_origin)]
+    mat_origin_path = numMat[mat_origin_path,, drop = FALSE]
+    mat_origin_path[mat_origin_path == 0] = ""
+    mat_origin_path[mat_origin_path == "99"] = "pathway"
+    mat_origin_path = mat_origin_path[,colnames(mat_origin), drop = FALSE]
+    mat_origin = rbind(mat_origin, mat_origin_path)
+    mat_origin = mat_origin[rownames(numMat), colnames(numMat), drop = FALSE]
+  }
+
+  #Plot layout
+  lo <- plot_layout(clinicalFeatures = clinicalFeatures, drawRowBar = drawRowBar, col_bar_height = col_bar_height,
+                    anno_height = anno_height, drawColBar = drawColBar, draw_titv = draw_titv, exprsTbl = leftBarData,
+                    legend_height = legend_height, titv_height = titv_height)
+  graphics::layout(mat = lo$mat, heights = lo$heights, widths = lo$widths)
+
+  #01: Draw scale axis for left barplot table
+  leftBarTitle = NULL
+  if(!is.null(leftBarData)){
+    leftBarTitle = colnames(leftBarData)[2]
+    colnames(leftBarData) = c('genes', 'exprn')
+    data.table::setDF(x = leftBarData, rownames = as.character(leftBarData$genes))
+
+    missing_samps = rownames(numMat)[!rownames(numMat) %in% rownames(leftBarData)]
+    if(length(missing_samps) > 0){
+      temp_data = data.frame(
+        row.names = missing_samps,
+        genes = missing_samps,
+        exprn = rep(0, length(missing_samps)),
+        stringsAsFactors = FALSE
+      )
+      leftBarData = rbind(leftBarData, temp_data)
+    }
+    leftBarData = leftBarData[rownames(numMat),, drop = FALSE]
+    #leftBarData = leftBarData[genes,, drop = FALSE]
+
+    if(is.null(leftBarLims)){
+      exprs_bar_lims = round(range(leftBarData$exprn, na.rm = TRUE), digits = 2)
+    }else{
+      exprs_bar_lims = leftBarLims
+    }
+
+    if(drawColBar){
+      par(mar = c(0.25 , 0, 1, 2), xpd = TRUE)
+      plot(x = NA, y = NA, type = "n", axes = FALSE,
+           xlim = exprs_bar_lims, ylim = c(0, 1), xaxs = "i")
+    }
+  }
+
+  #02: Draw top bar plot
+  if(drawColBar & is.null(topBarData)){
+    top_bar_data = top_bar_data[,colnames(numMat), drop = FALSE]
+    if(drawRowBar){
+      par(mar = c(0.25 , gene_mar, 2, pct_mar), xpd = TRUE)
+    } else {
+      par(mar = c(0.25 , gene_mar, 2, pct_mar), xpd = TRUE)
+    }
+
+    if(logColBar){
+      top_bar_data = apply(top_bar_data, 2, function(x) { x_fract = x / sum(x)
+                           x_log_total = log10(sum(x))
+                           x_fract * x_log_total})
+      top_bar_data[is.infinite(top_bar_data)] = 0
+    }
+
+    plot(x = NA, y = NA, type = "n", xlim = c(0,ncol(top_bar_data)),
+         ylim = c(0, max(colSums(x = top_bar_data, na.rm = TRUE))),
+         axes = FALSE, frame.plot = FALSE, xlab = NA, ylab = NA, xaxs = "i")
+    axis(side = 2, at = c(0, round(max(colSums(top_bar_data, na.rm = TRUE)))), las = 2, line = 0.5)
+    for(i in 1:ncol(top_bar_data)){
+      x = top_bar_data[,i]
+      names(x) = rownames(top_bar_data)
+      x = x[!x == 0]
+      if(length(x) > 0){
+        rect(xleft = i-1, ybottom = c(0, cumsum(x)[1:(length(x)-1)]), xright = i-0.1,
+             ytop = cumsum(x), col = vc_col[names(x)], border = NA, lwd = 0)
+      }
+    }
+    mtext(text = colBarTitle, side = 2, line = 2, cex = 0.6)
+
+  } else if(!is.null(topBarData) & drawColBar){
+    # Draw extra clinical data in top
+    if(drawRowBar){
+      par(mar = c(0.25 , gene_mar, 2, pct_mar), xpd = TRUE)
+    }else{
+      par(mar = c(0.25 , gene_mar, 2, pct_mar), xpd = TRUE)
+    }
+
+    if(is.data.frame(topBarData)){
+      extdata = data.table::copy(x = topBarData)
+      colnames(extdata)[1] = "Tumor_Sample_Barcode"
+      rownames(extdata) <- extdata$Tumor_Sample_Barcode
+    }else{
+      message("Top barplot data is derived from clinical column: ", topBarData)
+      extdata <- data.frame(maf@clinical.data)[,c("Tumor_Sample_Barcode", topBarData)]
+      rownames(extdata) <- extdata$Tumor_Sample_Barcode
+    }
+
+    if (is.null(colBarTitle)) colBarTitle <- colnames(extdata)[2]
+
+    colnames(extdata)[2] = "barheights"
+    extdata[, "barheights"] <- as.numeric(as.character(extdata[, "barheights"]))
+
+    if(!all(colnames(top_bar_data) %in% rownames(extdata))){
+      missing_topbars = colnames(top_bar_data)[!colnames(top_bar_data) %in% rownames(extdata)]
+      warning("Missing column barplot data for ",  length(missing_topbars), " samples")
+      extdata = rbind(extdata, data.frame(row.names = missing_topbars, Tumor_Sample_Barcode = missing_topbars,
+                                          barheights = 0,stringsAsFactors = FALSE))
+    }
+
+    extdata <- extdata[colnames(top_bar_data),]
+
+    plot(x = NA, y = NA, type = "n", xlim = c(0,nrow(extdata)), ylim = range(extdata[,"barheights"], na.rm = TRUE),
+         axes = FALSE, frame.plot = FALSE, xlab = NA, ylab = NA, xaxs = "i")
+    axis(side = 2, at = round(range(extdata[,"barheights"], na.rm = TRUE)), las = 2, line = 0.5)
+
+    for(i in 1:nrow(extdata)){
+      rect(xleft = i-1, xright = i-0.1, ybottom = 0, ytop = as.numeric(extdata[i, "barheights"]),
+           col = "#535c68", border = NA, lwd = 0)
+    }
+
+    # add horizontal bar
+    if (!is.null(colBarHlineHeight)){
+      lines(x=c(0,nrow(extdata)), y=c(colBarHlineHeight,colBarHlineHeight), lty=2, col="#535c68", lwd=1)
+      if (!is.null(colBarHlineLabel)){
+        text(x=colBarHlineLabelPos[1], y=colBarHlineLabelPos[2], paste0(colBarHlineLabel), cex=0.6, col="#535c68",
+             adj=colBarHlineLabelAdj)
+      }
+    }
+
+    mtext(text = colBarTitle, side = 2, line = 2, cex = 0.6)
+  }
+
+  #03: Draw scale for right barplot
+  rightBarTitle = NULL
+  if(drawRowBar){
+    if(is.null(rightBarData)){
+      side_bar_lims = c(0, max(unlist(apply(numMat, 1, function(x) cumsum(table(x[x!=0])))), na.rm = TRUE))
+    }else{
+      rightBarTitle = colnames(rightBarData)[2]
+      colnames(rightBarData) = c('genes', 'exprn')
+      data.table::setDF(x = rightBarData, rownames = as.character(rightBarData$genes))
+
+      missing_samps = rownames(numMat)[!rownames(numMat) %in% rownames(rightBarData)]
+      if(length(missing_samps) > 0){
+        temp_data = data.frame(
+          row.names = missing_samps,
+          genes = missing_samps,
+          exprn = rep(0, length(missing_samps)),
+          stringsAsFactors = FALSE
+        )
+        rightBarData = rbind(rightBarData, temp_data)
+      }
+      rightBarData = rightBarData[rownames(numMat),, drop = FALSE]
+
+      if(is.null(rightBarLims)){
+        side_bar_lims = round(range(rightBarData$exprn, na.rm = TRUE), digits = 2)
+      }else{
+        side_bar_lims = rightBarLims
+      }
+
+    }
+
+    if(drawColBar){
+      par(mar = c(0.25, 0, 1, 2), xpd = TRUE)
+
+      plot(x = NA, y = NA, type = "n", axes = FALSE,
+           xlim = side_bar_lims, ylim = c(0, 1), xaxs = "i")
+      rightBarTitle = "No. of samples"
+    }
+  }
+
+  #Draw expression barplot
+  if(!is.null(leftBarData)){
+
+  if(showTumorSampleBarcodes){
+    if(!drawRowBar & !drawColBar){
+      par(mar = c(barcode_mar, 1, 2.5, 0), xpd = TRUE)
+    }else if(!drawRowBar & drawColBar){
+      par(mar = c(barcode_mar, 1, 0, 5), xpd = TRUE)
+    }else if(drawRowBar & !drawColBar){
+      par(mar = c(barcode_mar, 1, 2.5, 0), xpd = TRUE)
+    } else{
+      par(mar = c(barcode_mar, 1, 0, 0), xpd = TRUE)
+    }
+  }else{
+    if(!drawRowBar & !drawColBar){
+      par(mar = c(0.5, 1, 2.5, 0), xpd = TRUE)
+    }else if(!drawRowBar & drawColBar){
+      par(mar = c(0.5, 1, 0, 5), xpd = TRUE)
+    }else if(drawRowBar & !drawColBar){
+      par(mar = c(0.5, 1, 2.5, 0), xpd = TRUE)
+    } else{
+      par(mar = c(0.5, 1, 0, 0), xpd = TRUE)
+    }
+  }
+
+    plot(x = NA, y = NA, type = "n", xlim = rev(-exprs_bar_lims), ylim = c(0, nrow(leftBarData)),
+         axes = FALSE, frame.plot = FALSE, xlab = NA, ylab = NA, xaxs = "i", yaxs = "i") #
+    for(i in 1:nrow(leftBarData)){
+      x = rev(leftBarData$exprn)[i]
+      rect(ybottom = i-1, xleft = -x, ytop = i-0.1,
+           xright = 0, col = "#535c68", border = NA, lwd = 0)
+    }
+    axis(side = 3, at = rev(-exprs_bar_lims), outer = FALSE, line = 0.25, labels = rev(exprs_bar_lims))
+    mtext(text = leftBarTitle, side = 3, line = 0.50, cex = 0.6)
+  }
+
+  #04: Draw the main matrix
+  if(showTumorSampleBarcodes){
+    if(!drawRowBar & !drawColBar){
+      par(mar = c(barcode_mar, gene_mar, 2.5, pct_mar), xpd = TRUE)
+    }else if(!drawRowBar & drawColBar){
+      par(mar = c(barcode_mar, gene_mar, 0, pct_mar), xpd = TRUE)
+    }else if(drawRowBar & !drawColBar){
+      par(mar = c(barcode_mar, gene_mar, 2.5, pct_mar), xpd = TRUE)
+    } else{
+      par(mar = c(barcode_mar, gene_mar, 0, pct_mar), xpd = TRUE)
+    }
+  }else{
+    if(!drawRowBar & !drawColBar){
+      par(mar = c(barcode_mar, gene_mar, 2.5, pct_mar), xpd = TRUE)
+    }else if(!drawRowBar & drawColBar){
+      par(mar = c(barcode_mar, gene_mar, 0, pct_mar), xpd = TRUE)
+    }else if(drawRowBar & !drawColBar){
+      par(mar = c(barcode_mar, gene_mar, 2.5, pct_mar), xpd = TRUE)
+    } else{
+      par(mar = c(barcode_mar, gene_mar, 0, pct_mar), xpd = TRUE)
+    }
+  }
+
+  nm = t(apply(numMat, 2, rev))
+  nm[nm == 0] = NA
+  image(x = 1:nrow(nm), y = 1:ncol(nm), z = nm, axes = FALSE, xaxt="n", yaxt="n",
+        xlab="", ylab="", col = "white") #col = "#FC8D62"
+  #Plot for all variant classifications
+  vc_codes_temp = vc_codes[!vc_codes %in% om$cnvc]
+  for(i in 2:length(names(vc_codes_temp))){
+    vc_code = vc_codes_temp[i]
+    col = vc_col[vc_code]
+    nm = t(apply(numMat, 2, rev))
+    #print(names(vc_code))
+    nm[nm != names(vc_code)] = NA
+    #print(paste0(vc_code, " ", col))
+    #Suppress warning due to min/max applied to a vector of NAs; Issue: #286
+    #This is an harmless warning as matrix is looped over all VC's and missing VC's form NA's (which are plotted in gray)
+    suppressWarnings(image(x = 1:nrow(nm), y = 1:ncol(nm), z = nm, axes = FALSE, xaxt="n", yaxt="n",
+          xlab="", ylab="", col = col, add = TRUE))
+  }
+
+  #Add blanks
+  nm = t(apply(numMat, 2, rev))
+  nm[nm != 0] = NA
+  image(x = 1:nrow(nm), y = 1:ncol(nm), z = nm, axes = FALSE, xaxt="n", yaxt="n", xlab="", ylab="", col = bgCol, add = TRUE)
+
+
+  #Add CNVs if any
+  mat_origin = mat_origin[rownames(numMat), colnames(numMat), drop = FALSE]
+  if(writeMatrix){
+    write.table(mat_origin, "onco_matrix.txt", sep = "\t", quote = FALSE)
+  }
+  mo = t(apply(mat_origin, 2, rev))
+
+  ##Complex events (mutated as well as CN altered)
+  complex_events = unique(grep(pattern = ";", x = mo, value = TRUE))
+
+  if(length(complex_events) > 0){
+    for(i in 1:length(complex_events)){
+      ce = complex_events[i]
+      #mo = t(apply(mat_origin, 2, rev))
+      ce_idx = which(mo == ce, arr.ind = TRUE)
+
+      ce = unlist(strsplit(x = ce, split = ";", fixed = TRUE))
+
+      nm_temp = matrix(NA, nrow = nrow(nm), ncol = ncol(nm))
+      nm_temp[ce_idx] = 0
+      image(x = 1:nrow(nm_temp), y = 1:ncol(nm_temp), z = nm_temp, axes = FALSE, xaxt="n",
+            yaxt="n", xlab="", ylab="", col = vc_col[ce[2]], add = TRUE)
+
+      ce_idx = which(t(nm_temp) == 0, arr.ind = TRUE)
+      for(i in seq_len(nrow(ce_idx))){
+        rowi = ce_idx[i,1]
+        coli = ce_idx[i,2]
+        rect(xleft = coli-0.5, ybottom = rowi-0.25, xright = coli+0.5, ytop = rowi+0.25, col = vc_col[ce[1]], border = NA, lwd = 0)
+      }
+    }
+  }
+
+  for(cnevent in om$cnvc){
+    cn_idx = which(mo == cnevent, arr.ind = TRUE)
+    if(nrow(cn_idx) > 0){
+      nm_temp = matrix(NA, nrow = nrow(nm), ncol = ncol(nm))
+      nm_temp[cn_idx] = 0
+      image(x = 1:nrow(nm_temp), y = 1:ncol(nm_temp), z = nm_temp, axes = FALSE, xaxt="n",
+            yaxt="n", xlab="", ylab="", col = bgCol, add = TRUE)
+      cn_idx = which(t(nm_temp) == 0, arr.ind = TRUE)
+      for(i in seq_len(nrow(cn_idx))){
+        rowi = cn_idx[i,1]
+        coli = cn_idx[i,2]
+        rect(xleft = coli-0.5, ybottom = rowi-0.25, xright = coli+0.5, ytop = rowi+0.25, col = vc_col[cnevent], border = NA, lwd = 0)
+      }
+    }
+  }
+
+  #Add grids
+  abline(h = (1:ncol(nm)) + 0.5, col = borderCol, lwd = sepwd_genes)
+  abline(v = (1:nrow(nm)) + 0.5, col = borderCol, lwd = sepwd_samples)
+
+  #Add boxes if pathways are opted
+  if(!is.null(pathways)){
+    temp_dat = lapply(seq_along(temp_dat), function(i){
+      data.table::rbindlist(list(temp_dat[[i]], data.table::data.table(Gene = names(temp_dat)[i])), use.names = TRUE, fill = TRUE)
+    })
+    temp_dat = data.table::rbindlist(l = temp_dat, use.names = TRUE, fill = TRUE)
+    #return(temp_dat)
+    temp_dat[, row_id := nrow(temp_dat):1]
+    temp_dat = split(temp_dat, as.factor(temp_dat$Pathway))
+    lapply(temp_dat, function(td){
+      rect(xleft = 0.5, ybottom = min(td$row_id)-0.499, xright = nrow(nm)+0.5, ytop = max(td$row_id)+0.499, border = pwLineCol, lwd = pwLineWd)
+    })
+
+    #New percent alt with pathways
+    percent_alt = rev(paste0(apply(nm, 2, function(x){
+      round(length(x[is.na(x)])/totSamps * 100)
+    }), "%"))
+  }
+
+  # #Draw grids for the samples
+  # if(!is.null(gridFeature)){
+  #   To add: https://github.com/PoisonAlien/maftools/issues/528
+  # }
+
+  #Add box border
+  if (drawBox) {
+    box(lty = 'solid', col = '#535c68', lwd = 2)
+  }
+
+  mtext(text = colnames(nm), side = 2, at = 1:ncol(nm),
+        font = 3, line = 0.4, cex = fontSize, las = 2)
+  if(showPct){
+    mtext(text = rev(percent_alt), side = 4, at = 1:ncol(nm),
+          font = 1, line = 0.4, cex = fontSize, las = 2, adj = 0.15)
+  }
+
+  if(showTumorSampleBarcodes){
+    text(x =1:nrow(nm), y = par("usr")[3] - 0.2,
+         labels = rownames(nm), srt = barcodeSrt, font = 1, cex = SampleNamefontSize, adj = 1)
+  }
+  
+  #05: Draw right side barplot
+  if(drawRowBar){
+    if(showTumorSampleBarcodes){
+      if(!drawRowBar || !drawColBar){
+        par(mar = c(barcode_mar, 0, 2.5, 1), xpd = TRUE)
+      }else{
+        par(mar = c(barcode_mar, 0, 0, 1), xpd = TRUE)
+      }
+    }else{
+      if(!drawRowBar || !drawColBar){
+        par(mar = c(barcode_mar, 0, 2.5, 1), xpd = TRUE)
+      }else{
+        par(mar = c(barcode_mar, 0, 0, 1), xpd = TRUE)
+      }
+    }
+
+    if(is.null(rightBarData)){
+      #side_bar_data = apply(numMat, 1, function(x) table(x[x!=0]))
+      side_bar_data = lapply(seq_len(nrow(numMat)), function(i) {
+        xi = numMat[i, ]
+        table(xi[!xi == 0])
+      })
+      names(side_bar_data) = rownames(numMat)
+      plot(x = NA, y = NA, type = "n", xlim = side_bar_lims, ylim = c(0, length(side_bar_data)),
+           axes = FALSE, frame.plot = FALSE, xlab = NA, ylab = NA, xaxs = "i", yaxs = "i") #
+
+      for(i in 1:length(side_bar_data)){
+        x = rev(side_bar_data)[[i]]
+        if(length(x) > 0){
+          rect(ybottom = i-1, xleft = c(0, cumsum(x)[1:(length(x)-1)]), ytop = i-0.1,
+               xright = cumsum(x), col = vc_col[vc_codes[names(x)]], border = NA, lwd = 0)
+        }
+      }
+      axis(side = 3, at = side_bar_lims, outer = FALSE, line = 0.25)
+      mtext(text = rightBarTitle, side = 3, line = 0.5, cex = 0.6)
+    }else{
+
+      plot(x = NA, y = NA, type = "n", xlim = side_bar_lims, ylim = c(0, nrow(rightBarData)),
+           axes = FALSE, frame.plot = FALSE, xlab = NA, ylab = NA, xaxs = "i", yaxs = "i") #
+      for(i in 1:nrow(rightBarData)){
+        x = rev(rightBarData$exprn)[i]
+        rect(ybottom = i-1, xleft = x, ytop = i-0.1,
+             xright = 0, col = "#535c68", border = NA, lwd = 0)
+      }
+      axis(side = 3, at = side_bar_lims, outer = FALSE, line = 0.25)
+      mtext(text = rightBarTitle, side = 3, line = 0.5, cex = 0.6)
+    }
+  }
+
+  #06: Plot annotations if any
+  if(!is.null(clinicalFeatures)){
+
+    #clini_lvls = as.character(unlist(lapply(annotation, function(x) unique(as.character(x)))))
+    clini_lvls = lapply(annotation, function(x) unique(as.character(x)))
+
+    if(is.null(annotationColor)){
+      annotationColor = maftools:::get_anno_cols(ann = annotation)
+    }
+    annotationColor = annotationColor[colnames(annotation)]
+
+    annotationColor = lapply(annotationColor, function(x) {
+      na_idx = which(is.na(names(x)))
+      x[na_idx] = "gray30"
+      names(x)[na_idx] = "NA"
+      x
+    })
+
+    anno_cols = c()
+    for(i in 1:length(annotationColor)){
+      anno_cols = c(anno_cols, annotationColor[[i]])
+    }
+
+    #clini_lvls = clini_lvls[!is.na(clini_lvls)]
+    clini_lvls = lapply(clini_lvls, function(cl){
+      temp_names = suppressWarnings(sample(
+        x = setdiff(x = 1:1000, y = as.numeric(as.character(cl))),
+        size = length(cl),
+        replace = FALSE
+      ))
+      names(cl) = temp_names#1:length(clini_lvls)
+      cl
+    })
+
+    temp_rownames = rownames(annotation)
+    annotation = data.frame(lapply(annotation, as.character),
+                            stringsAsFactors = FALSE, row.names = temp_rownames)
+
+    annotation_color_coded = data.frame(row.names = rownames(annotation), stringsAsFactors = FALSE)
+    for(i in 1:length(clini_lvls)){
+      cl = clini_lvls[[i]]
+      clname = names(clini_lvls)[i]
+      cl_vals = annotation[,clname] #values in column
+      for(i in 1:length(cl)){
+        cl_vals[cl_vals == cl[i]] = names(cl[i])
+      }
+      annotation_color_coded = cbind(annotation_color_coded, cl_vals, stringsAsFactors = FALSE)
+    }
+    names(annotation_color_coded) = names(clini_lvls)
+
+    annotation = data.frame(lapply(annotation_color_coded, as.numeric), stringsAsFactors=FALSE, 
+                            row.names=temp_rownames)
+    annotation = annotation[colnames(numMat), ncol(annotation):1, drop = FALSE]
+
+    if(!is.null(leftBarData)){
+      plot.new()
+    }
+
+    if(!drawRowBar){
+      par(mar = c(0, gene_mar, 0, pct_mar), xpd = TRUE)
+    }else{
+      par(mar = c(0, gene_mar, 0, pct_mar), xpd = TRUE)
+    }
+
+    image(x = 1:nrow(annotation), y = 1:ncol(annotation), z = as.matrix(annotation),
+          axes = FALSE, xaxt="n", yaxt="n", bty = "n",
+          xlab="", ylab="", col = "white") #col = "#FC8D62"
+
+    #Plot for all variant classifications
+    for(i in 1:length(clini_lvls)){
+      cl = clini_lvls[[i]]
+      clnames = names(clini_lvls)[i]
+      cl_cols = annotationColor[[clnames]]
+      for(i in 1:length(names(cl))){
+        anno_code = cl[i]
+        col = cl_cols[anno_code]
+        temp_anno = as.matrix(annotation)
+        #Handle NA's
+        if(is.na(col)){
+          col = "gray70"
+          temp_anno[is.na(temp_anno)] = as.numeric(names(anno_code))
+        }
+        temp_anno[temp_anno != names(anno_code)] = NA
+
+        suppressWarnings(image(x = 1:nrow(temp_anno), y = 1:ncol(temp_anno), z = temp_anno,
+                               axes = FALSE, xaxt="n", yaxt="n", xlab="", ylab="", col = col, add = TRUE))
+      }
+    }
+
+    #Add grids
+    abline(h = (1:ncol(nm)) + 0.5, col = annoBorderCol, lwd = sepwd_genes)
+    abline(v = (1:nrow(nm)) + 0.5, col = annoBorderCol, lwd = sepwd_samples)
+    mtext(text = colnames(annotation), side = 4,
+          font = 1, line = 0.4, cex = fontSize, las = 2, at = 1:ncol(annotation))
+
+    if(drawRowBar){
+      par(mar = c(0.5, 0, 0, 1), xpd = TRUE)
+      plot.new()
+    }
+  }
+
+  #07: Draw TiTv plot
+  if(draw_titv){
+    titv_dat = titv(maf = maf, useSyn = TRUE, plot = FALSE)
+    titv_dat = titv_dat$fraction.contribution
+    data.table::setDF(x = titv_dat, rownames = as.character(titv_dat$Tumor_Sample_Barcode))
+    titv_dat = titv_dat[,-1]
+    titv_dat = t(titv_dat[colnames(numMat), ])
+
+    missing_samps = colnames(numMat)[!colnames(numMat) %in% colnames(titv_dat)]
+    if(length(missing_samps) > 0){
+      temp_data = matrix(data = 0, nrow = 6, ncol = length(missing_samps))
+      colnames(temp_data) = missing_samps
+      titv_dat = cbind(titv_dat, temp_data)
+      titv_dat = titv_dat[,colnames(numMat)]
+    }
+
+    if(!is.null(leftBarData)){
+     plot.new()
+    }
+
+    if(!drawRowBar){
+      par(mar = c(0, gene_mar, 0, 5), xpd = TRUE)
+    }else{
+      par(mar = c(0, gene_mar, 0, 3), xpd = TRUE)
+    }
+
+
+    plot(x = NA, y = NA, type = "n", xlim = c(0,ncol(titv_dat)), ylim = c(0, 100),
+         axes = FALSE, frame.plot = FALSE, xlab = NA, ylab = NA, xaxs = "i")
+
+    if(is.null(titv_col)){
+      titv_col = get_titvCol(alpha = 1)
+    }
+
+    for(i in 1:ncol(titv_dat)){
+      x = titv_dat[,i]
+      x = x[x > 0]
+      if(length(x) > 0){
+        rect(xleft = i-1, ybottom = c(0, cumsum(x)[1:(length(x)-1)]), xright = i-0.1,
+             ytop = cumsum(x), col = titv_col[names(x)], border = NA, lwd = 0)
+      }else{
+        rect(xleft = i-1, ybottom = c(0, 100), xright = i-0.1,
+             ytop = 100, col = "gray70", border = NA, lwd = 0)
+      }
+    }
+
+    if(drawRowBar){
+      par(mar = c(0, 0, 1, 6), xpd = TRUE)
+      plot(NULL,ylab='',xlab='', xlim=0:1, ylim=0:1, axes = FALSE)
+      lep = legend("topleft", legend = names(titv_col),
+                   col = titv_col, border = NA, bty = "n",
+                   ncol= 2, pch = 15, xpd = TRUE, xjust = 0, yjust = 0,
+                   cex = legendFontSize)
+
+    }else{
+      mtext(text = names(titv_col)[1:3], side = 2, at = c(25, 50, 75),
+            font = 1, line = 0.4, cex = fontSize, las = 2, col = titv_col[1:3])
+      mtext(text = names(titv_col)[4:6], side = 4, at = c(25, 50, 75),
+            font = 1, line = 0.4, cex = fontSize, las = 2, col = titv_col[4:6],  adj = 0.15)
+    }
+  }
+
+  #08: Add legends
+  par(mar = c(0.5, gene_mar, 0, 0), xpd = TRUE)
+  plot(NULL,ylab='',xlab='', xlim=0:1, ylim=0:1, axes = FALSE)
+
+  leg_classes = vc_col[vc_codes[2:length(vc_codes)]]
+  x_axp <- 0
+  y_axp <- 1
+  max_w_cur <- 0
+  n_y_cur <- 0
+  n_y_max <- legend_n_items_max_per_col
+
+  # undo trick to have Fusion shown as reduce-height rectangles similarly to CNV
+  maf@data[, "Variant_Type"] <- vt_maf_original
+
+  # make one column per Variant_Type
+  vt_codes <- sort(unique(as.character(maf@data$Variant_Type)))
+  vt_codes2vc <- lapply(vt_codes, function(vt) {
+                          unique(as.character(maf@data[maf@data$Variant_Type==vt,]$Variant_Classification))})
+  vt_codes2vc <- setNames(vt_codes2vc, vt_codes)
+
+  # make a Category for Other Event
+  vc_other <- setdiff(vc_codes[2:length(vc_codes)], unique(as.character(maf@data$Variant_Classification)))
+
+  # remove Multi_Hit if it never occurs
+  if ("Multi_Hit" %in% vc_codes){
+    num_Multi_Hit <- as.numeric(names(vc_codes)[vc_codes=="Multi_Hit"])
+    if(!any(sapply(seq_len(nrow(numMat)), function(i) {num_Multi_Hit %in% numMat[i,]}))){
+      vc_other <- setdiff(vc_other, "Multi_Hit")
+    }
+  }
+
+  if (length(vc_other) > 0){
+    vt_codes2vc[["Other"]] <- vc_other
+    vt_codes <- c(vt_codes, "Other")
+  }
+
+  for (i in 1:length(vt_codes)){
+    x = vt_codes2vc[[vt_codes[i]]]
+    x = leg_classes[x]
+    xt = names(x)
+    if("NA" %in% xt){
+      xt = xt[!xt %in% c("NA")]
+      xt = sort(xt, decreasing = FALSE)
+      xt = union(xt, c("NA"))
+      xt = intersect(xt, names(x))
+      x = x[xt]
+    }else{
+      xt = sort(xt, decreasing = FALSE)
+      x = x[xt]
+    }
+
+    if ((n_y_cur + length(x)) <= n_y_max){
+      # draw all on same column
+      lep = legend(x = x_axp, y = y_axp, legend = names(x),
+                   col = x, border = NA,
+                   ncol= 1, pch = 15, xpd = TRUE, xjust = 0, bty = "n",
+                   cex = legendFontSize, title = vt_codes[i],
+                   title.adj = 0)
+      y_axp = y_axp - lep$rect$h
+      n_y_cur = n_y_cur + length(x)
+      if (lep$rect$w >= max_w_cur){
+        max_w_cur <- lep$rect$w
+      }
+    } else {
+      # draw on separate columns
+
+      first_loop <- TRUE
+      while(length(x)!=0) {
+        # if current column already full or if current column is nearly full and x has more than 1 item,
+        # move to the next column to improve aesthetics
+        if (n_y_cur==n_y_max | (n_y_cur==n_y_max-1 & length(x) > 1)){
+          y_axp <- 1
+          x_axp <- x_axp + max_w_cur
+          max_w_cur <- 0
+          n_y_cur <- 0
+        }
+        
+        # draw as much as possible
+        j <- min(n_y_max - n_y_cur, length(x))
+        x_cur <- x[1:j]
+      
+        if (j+1 <= length(x)){
+          x <- x[(j+1):length(x)]
+        } else {
+          x <- c()
+        }
+
+        # draw title once
+        if (first_loop){
+          title <- vt_codes[i]
+        } else {
+          title <- NULL
+        }
+
+        lep = legend(x = x_axp, y = y_axp, legend = names(x_cur),
+                     col = x_cur, border = NA,
+                     ncol= 1, pch = 15, xpd = TRUE, xjust = 0, bty = "n",
+                     cex = legendFontSize, title = title,
+                     title.adj = 0)
+
+        y_axp = y_axp - lep$rect$h
+        n_y_cur = n_y_cur + length(x_cur)
+
+        if (lep$rect$w >= max_w_cur){
+          max_w_cur <- lep$rect$w
+        }
+
+        first_loop <- FALSE
+      }
+    }
+  }
+
+  if(!is.null(clinicalFeatures)){
+
+    for(i in 1:ncol(annotation)){
+      x = annotationColor[[i]]
+      xt = names(x)
+      if("NA" %in% xt){
+        xt = xt[!xt %in% "NA"]
+        xt = sort(xt, decreasing = FALSE)
+        xt = c(xt, "NA")
+        x = x[xt]
+      }else{
+        xt = sort(xt, decreasing = FALSE)
+        x = x[xt]
+      }
+
+      if ((n_y_cur + length(x)) <= n_y_max){
+        # draw all on same column
+        lep = legend(x = x_axp, y = y_axp, legend = names(x),
+                     col = x, border = NA,
+                     ncol= 1, pch = 15, xpd = TRUE, xjust = 0, bty = "n",
+                     cex = legendFontSize, title = rev(colnames(annotation))[i],
+                     title.adj = 0)
+        y_axp = y_axp - lep$rect$h
+        n_y_cur = n_y_cur + length(x)
+        if (lep$rect$w >= max_w_cur){
+          max_w_cur <- lep$rect$w
+        }
+      } else {
+        # draw on separate columns
+
+        first_loop <- TRUE
+        while(length(x)!=0) {
+          # if current column already full, move to next column
+          if (n_y_cur==n_y_max){
+            y_axp <- 1
+            x_axp <- x_axp + max_w_cur
+            max_w_cur <- 0
+            n_y_cur <- 0
+          }
+          
+          # draw as much as possible
+          j <- min(n_y_max - n_y_cur, length(x))
+          x_cur <- x[1:j]
+        
+          if (j+1 <= length(x)){
+            x <- x[(j+1):length(x)]
+          } else {
+            x <- c()
+          }
+
+          # draw title once
+          if (first_loop){
+            title <- rev(colnames(annotation))[i]
+          } else {
+            title <- NULL
+          }
+
+          lep = legend(x = x_axp, y = y_axp, legend = names(x_cur),
+                       col = x_cur, border = NA,
+                       ncol= 1, pch = 15, xpd = TRUE, xjust = 0, bty = "n",
+                       cex = legendFontSize, title = title,
+                       title.adj = 0)
+
+          y_axp = y_axp - lep$rect$h
+          n_y_cur = n_y_cur + length(x_cur)
+
+          if (lep$rect$w >= max_w_cur){
+            max_w_cur <- lep$rect$w
+          }
+
+          first_loop <- FALSE
+        }
+      }
+
+    }
+  }
+
+  if(removeNonMutated){
+    #mutSamples = length(unique(unlist(genesToBarcodes(maf = maf, genes = rownames(mat), justNames = TRUE))))
+    altStat = paste0("Altered in ", ncol(numMat), " (", round(ncol(numMat)/totSamps, digits = 4)*100, "%) of ",
+                     totSamps, " samples.")
+  }else{
+    mutSamples = length(unique(unlist(genesToBarcodes(maf = maf, genes = rownames(numMat), justNames = TRUE))))
+    altStat = paste0("Altered in ", mutSamples, " (", round(mutSamples/totSamps, digits = 4)*100, "%) of ", totSamps, 
+                     " samples.")
+  }
+
+  if(showTitle){
+    if(is.null(titleText)){
+      title(main = altStat, outer = TRUE, line = -1, cex.main = titleFontSize)
+    }else{
+      title(main = titleText, outer = TRUE, line = -1, cex.main = titleFontSize)
+    }
+  }
+  return(invisible(rownames(nm)))
+}
+
+
+get_sample_name_fontsize <- function(n_tumors){
+  if (n_tumors >= 500){
+    0.2
+  } else if (n_tumors >= 200){
+    0.3
+  } else if (n_tumors >= 100){
+    0.4
+  } else if (n_tumors >= 50) {
+    0.45
+  } else {
+    0.65
+  }
+}
+
+make_plot <- function(obj_maf, genes_list, df_left_bar_data, df_right_bar_data, oncoplot_colors, n_genes, n_tumors, 
+                      output, draw_titv=T, showTumorSampleBarcodes=T, font_size=0.65, clinicalFeatures=NULL,
+                      df_top_bar_data=NULL){
+  drawRowBar <- T
+  drawColBar <- T
+  if (!is.null(clinicalFeatures)){
+    anno_height <- 0.2*length(clinicalFeatures)
+  } else {
+    anno_height <- NULL
+  }
+  titv_height <- 3
+  legend_height <- 4
+  col_bar_height <- 2.5
+  lo <- plot_layout(clinicalFeatures=clinicalFeatures, drawRowBar=drawRowBar, drawColBar=drawColBar,
+                    draw_titv=draw_titv, exprsTbl=df_left_bar_data, col_bar_height=col_bar_height,
+                    anno_height=anno_height, legend_height=legend_height, titv_height=titv_height)
+
+  # compute margin for barcode
+  barcodes <- unique(as.character(obj_maf@data$Tumor_Sample_Barcode))
+  barcode_max_length <- max(nchar(barcodes))
+  barcode_fontsize <- get_sample_name_fontsize(n_tumors)
+  if (showTumorSampleBarcodes){
+    barcode_mar <- barcode_max_length*0.6*barcode_fontsize
+  } else {
+    barcode_mar <- 0.5
+  }
+
+  # compute margin for gene names
+  gene_max_length <- max(nchar(genes_list))
+  gene_mar <- gene_max_length*1.2*font_size
+
+  if (!is.null(df_left_bar_data)){
+    rwidth_main <- lo$widths[2]
+  } else {
+    rwidth_main <- lo$widths[1]
+  }
+  
+  if (!is.null(df_top_bar_data)){
+    colBarTitle <- "TMB\n(mut / Mb)"
+    colBarHlineHeight <- 10
+    colBarHlineLabel <- "TMB > 10"
+    colBarHlineLabelPos <- c(round(n_tumors/2),colBarHlineHeight+2)
+    colBarHlineLabelAdj <- c(0,0)
+  } else {
+    colBarTitle <- NULL
+    colBarHlineHeight <- NULL
+    colBarHlineLabel <- NULL
+    colBarHlineLabelPos <- NULL
+    colBarHlineLabelAdj <- NULL 
+  }
+
+  if (n_tumors >= 500){
+    width_one <- 1.5
+  } else if (n_tumors >= 200){
+    width_one <- 2
+  } else if (n_tumors >= 100){
+    width_one <- 3
+  } else if (n_tumors >= 50) {
+    width_one <- 5
+  } else if (n_tumors >= 25) {
+    width_one <- 6
+  } else {
+    width_one <- 15
+  }
+
+
+  width_main <- width_one * n_tumors
+  rwidth_total <- sum(lo$widths)
+  width_total <- width_main * rwidth_total/rwidth_main
+
+  if (drawColBar){
+    rheight_main <- lo$heights[2]
+  } else {
+    rheight_main <- lo$heights[1]
+  }
+
+  if (n_genes >= 500){
+    height_one <- 3
+  } else if (n_genes >= 200){
+    height_one <- 4
+  } else if (n_genes >= 100){
+    height_one <- 5
+  } else if (n_genes >= 75){
+    height_one <- 6
+  } else if (n_genes >= 50) {
+    height_one <- 7
+  } else if (n_genes >= 40) {
+    height_one <- 8
+  } else {
+    height_one <- 10
+  }
+
+
+  height_main <- height_one * n_genes
+  rheight_total <- sum(lo$heights)
+  height_total <- height_main * rheight_total/rheight_main
+
+  pdf(
+      file    = output,
+      width   = width_total/72,
+      height  = height_total/72,
+      onefile = FALSE
+  )
+  plot.new()
+  par(mar=c(0,0,0,0), oma=c(0,0.5,0.5,0.5))
+
+  oncoplot(
+      maf                        = obj_maf,
+      top                        = NULL,
+      minMut                     = NULL,
+      genes                      = genes_list,
+      altered                    = FALSE,
+      drawRowBar                 = drawRowBar,              # barplot for each gene
+      drawColBar                 = drawColBar,              # barplot for each sample
+      leftBarData                = df_left_bar_data,
+      leftBarLims                = NULL,
+      rightBarData               = df_right_bar_data,
+      rightBarLims               = c(0,5),
+      topBarData                 = df_top_bar_data,
+      logColBar                  = FALSE,
+      includeColBarCN            = FALSE,             # include copy number in column bar plot
+      clinicalFeatures           = clinicalFeatures,
+      annotationColor            = oncoplot_colors$ann,
+      annotationDat              = NULL,
+      annoBorderCol              = NA,
+      pathways                   = NULL,
+      selectedPathways           = NULL,
+      draw_titv                  = draw_titv,
+      drawBox                    = FALSE,
+      showTumorSampleBarcodes    = showTumorSampleBarcodes,
+      barcode_mar                = barcode_mar,
+      barcodeSrt                 = 90,
+      gene_mar                   = gene_mar,
+      col_bar_height             = col_bar_height,
+      anno_height                = anno_height,
+      legend_height              = legend_height,
+      titv_height                = titv_height,
+      genesToIgnore              = NULL,
+      removeNonMutated           = TRUE,
+      fill                       = TRUE,
+      cohortSize                 = NULL,
+      colors                     = oncoplot_colors$vc,
+      sortByMutation             = FALSE,
+      sortByAnnotation           = FALSE,
+      numericAnnoCol             = 'YlOrBr',
+      groupAnnotationBySize      = TRUE,
+      annotationOrder            = NULL,
+      keepGeneOrder              = TRUE,
+      GeneOrderSort              = FALSE,
+      sampleOrder                = NULL,
+      writeMatrix                = FALSE,
+      sepwd_genes                = 1.5,
+      sepwd_samples              = 0.25,
+      fontSize                   = font_size,
+      SampleNamefontSize         = get_sample_name_fontsize(n_tumors),
+      showTitle                  = TRUE,
+      titleFontSize              = 1.5,
+      legendFontSize             = 0.85,
+      annotationFontSize         = 0.85,
+      bgCol                      = oncoplot_colors$bg,
+      borderCol                  = oncoplot_colors$border,
+      colbar_pathway             = FALSE,
+      cBioPortal                 = FALSE,
+      titleText                  = NULL,
+      showPct                    = TRUE,
+      digitsPct                  = 0,
+      pct_mar                    = 2,
+      colBarTitle                = colBarTitle,
+      colBarHlineHeight          = colBarHlineHeight,
+      colBarHlineLabel           = colBarHlineLabel,
+      colBarHlineLabelPos        = colBarHlineLabelPos,
+      colBarHlineLabelAdj        = colBarHlineLabelAdj,
+      legend_n_items_max_per_col = 5
+  )
+
+  dev.off()
+}
+
+main <- function(args){
+  df_cln <- load_table(args$input_cln)
+  df_maf <- load_table(args$input_maf)
+
+  genes_list <- load_table(args$input_gen) %>% pull(Hugo_Symbol)
+  df_left_bar_data <- load_table(args$input_lbar)
+  df_right_bar_data <- load_table(args$input_rbar)
+  df_top_bar_data <- load_table(args$input_tbar)
+  
+  genes_sorted <- df_maf %>% distinct(Tumor_Sample_Barcode, Hugo_Symbol) %>% arrange(Hugo_Symbol) %>% 
+    group_by(Hugo_Symbol) %>% summarize(n=n()) %>% arrange(desc(n)) %>% pull(var=Hugo_Symbol)
+  genes_list <- intersect(genes_sorted, genes_list)
+
+  if (!is.null(df_right_bar_data)){
+    df_right_bar_data <- df_right_bar_data %>% mutate(`-log10 (fdr)`=ifelse(`-log10 (fdr)`>=5, 5, `-log10 (fdr)`))
+  }
+
+  if (!is.null(df_top_bar_data)){
+    df_top_bar_data <- as.data.frame(df_top_bar_data)
+  }
+
+  vc_list <- unique(df_maf$Variant_Classification)
+  n_genes <- nrow(df_left_bar_data)
+  n_tumors <- length(unique(df_cln$Tumor_Sample_Barcode))
+
+  vc_colors <- load_colors(paste0("Variant_Classification_", args$vc_colors))
+  oncoplot_colors <- list(bg="#f5f3f4",
+                          border="white",
+                          vc=unlist(vc_colors),
+                          ann=list(RNA=setNames(c("#2a6f97", "#a9d6e5"), c("Yes", "No")),
+                                   Site=setNames(c("#9d4edd", "#e0aaff"),
+                                                 c("Bladder", "Upper urothelial tract"))))
+
+  # read into maftools object
+  obj_maf <- maftools::read.maf(maf=df_maf,
+                                clinicalData             = df_cln %>% replace(is.na(.), "NA"),
+                                removeDuplicatedVariants = FALSE,
+                                useAll                   = TRUE,            
+                                gisticAllLesionsFile     = NULL,
+                                gisticAmpGenesFile       = NULL,
+                                gisticDelGenesFile       = NULL,
+                                gisticScoresFile         = NULL,
+                                cnLevel                  = NULL,
+                                cnTable                  = NULL,
+                                isTCGA                   = FALSE,
+                                vc_nonSyn                = vc_list,
+                                verbose                  = TRUE)
+
+  # left bar
+  if (!args$draw_left_bar){
+    df_left_bar_data <- NULL
+  }
+
+  # sample names
+  showTumorSampleBarcodes <- tolower(args$show_samples)=="yes"
+
+  # clinicalFeatures
+  clinicalFeatures <- intersect(c("Site", "RNA"), colnames(df_cln))
+  if (identical(clinicalFeatures, character(0))) clinicalFeatures <- NULL
+
+  # plot with maftools::oncoplot
+  make_plot(obj_maf, genes_list, df_left_bar_data, df_right_bar_data, oncoplot_colors, n_genes, n_tumors,
+            output=args$output, draw_titv=args$draw_titv, showTumorSampleBarcodes=showTumorSampleBarcodes,
+            font_size=args$font_size, df_top_bar_data=df_top_bar_data, clinicalFeatures=clinicalFeatures)
+}
+
+# run ==================================================================================================================
+
+if (getOption('run.main', default=TRUE)) {
+  parser <- ArgumentParser(description='Draw oncoplot using maftools R package.')
+  parser$add_argument("--input_gen", type="character", help="Path to input genes list file.",
+                      default="../../results/combined_alterations/oncoplots/genes_prism_BLCA_DNA_T.tsv")
+  parser$add_argument("--input_cln", type="character", help="Path to input clinical file.",
+                      default="../../results/combined_alterations/oncoplots/clinical_prism_BLCA_DNA_T.tsv")
+  parser$add_argument("--input_maf", type="character", help="Path to input mutations file.",
+                      default="../../results/combined_alterations/oncoplots/mutations_prism_BLCA_DNA_T.tsv")
+  parser$add_argument("--input_lbar", type="character", help="Path to input left bar data file.",
+                      default="../../results/combined_alterations/oncoplots/left_bar_data_prism_BLCA_DNA_T.tsv")
+  parser$add_argument("--input_rbar", type="character", help="Path to input right bar data file.",
+                      default=NULL)
+  parser$add_argument("--input_tbar", type="character", help="Path to input top bar data file.",
+                      default="../../results/combined_alterations/oncoplots/top_bar_data_prism_BLCA_DNA_T.tsv")
+  parser$add_argument("--draw_titv", action="store_true", help="Should titv be drawn?",
+                      default=F)
+  parser$add_argument("--draw_left_bar", action="store_true", help="Should left bar be drawn?",
+                      default=F)
+  parser$add_argument("--show_samples", type="character", help="Should sample names be drawn?",
+                      default="yes")
+  parser$add_argument("--vc_colors", type="character", help="Choose 'Custom' or 'Mutpan'",
+                      default="Custom")
+  parser$add_argument("--font_size", type="double", help="Font size for labels.",
+                      default=0.45)
+  parser$add_argument("--output", type="character", help="Path to plot.",
+                      default="../../results/combined_alterations/oncoplots/oncoplot_prism_BLCA_DNA_T_Custom.pdf")
+  parser$add_argument("-l", "--log", type="character", help="Path where log file will be saved.")
+  args <- parser$parse_args()
+
+  # log file
+  log <- file(args$log, open="wt")
+  sink(log)
+  sink(log, type="message")
+
+  print(args)
+  main(args)
+}
