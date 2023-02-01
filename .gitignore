@@ -1,0 +1,69 @@
+# Project specific
+**/tests/**.pdf
+code/functions/**/build
+code/functions/**/dist
+code/scripts/**/resources
+code/scripts/**/debug
+code/pipelines/**/resources
+**/config/**.tsv
+
+# Tags
+*tags
+
+# Logs
+*.log
+logs/
+benchmark
+
+# Tags
+*tags
+
+# Mac specific
+.DS_Store
+.DS_Store?
+*.DS_Store
+
+# Python
+__pycache__/
+.ipynb_checkpoints/
+*.egg-info/
+.tool-versions
+*.pyc
+
+# Python test
+*.pytest_cache
+*.coverage
+*.coverage*
+
+# R
+*.Rproj.user
+*.Rproj
+renv.lock
+activate.R
+renv/
+.Rprofile
+.Renviron
+.Rhistory
+.Rproj.user
+
+# Config files
+.ycm_extra_conf.py
+
+# Open cached files
+*.m~
+*.*swp
+*.*swo
+~$*.*pptx
+
+# Compiled sources
+*.com
+*.class
+*.dll
+*.exe
+*.o
+*.so
+
+# Pipelines
+code/pipelines/**/*tests*
+.snakemake/
+benchmarks/
