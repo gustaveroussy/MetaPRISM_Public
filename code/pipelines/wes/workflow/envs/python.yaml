@@ -1,0 +1,20 @@
+name: metaprism_python
+channels:
+    - bioconda
+    - conda-forge
+    - defaults
+dependencies:
+    - bedtools=2.30.0
+    - htslib=1.9
+    - kiwisolver=1.3.2
+    - matplotlib=3.5.1
+    - numpy=1.22.2
+    - openpyxl=3.0.5
+    - pandas=1.4.1
+    - pysam=0.19.1
+    - requests=2.24.0
+    - pip=22.0.3
+    - python=3.8
+    - suds-jurko=0.6
+    - samtools=1.9
+    - tabix=1.11

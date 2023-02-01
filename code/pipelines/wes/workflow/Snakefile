@@ -1,0 +1,167 @@
+# @created: 01 Dec 21
+# @modified: 02 Jan 23
+# @uthor: Yoann Pradat
+#
+# This pipeline runs all analyses for whole-exome sequencing data starting from FASTQs.
+
+include: "rules/common.smk"
+
+##### Target rules #####
+
+def get_input_rule_all(w):
+    inputs = []
+
+    # +++++++++++++++++++++++
+    #### IRODS + FASTQ QC
+    # +++++++++++++++++++++++
+    inputs += expand('%s/qc/fastqc_1/{fastq}_fastqc.html' % R_FOLDER, fastq=fastqs)
+    # inputs += expand('%s/prism/wes/fastp/{sample}_R{i}.fastq.gz' % D_FOLDER, sample=samples, i=[1,2])
+    # inputs += expand('%s/qc/fastp/{sample}_fastp_report.html' % R_FOLDER, sample=samples)
+    inputs += expand('%s/qc/fastqc_2/{fastq}_fastqc.html' % R_FOLDER, fastq=fastqs)
+    # +++++++++++++++++++++++
+    #### MAPPING
+    # +++++++++++++++++++++++
+    # inputs += expand("%s/mapping/{sample}.bam" % R_FOLDER, sample=samples)
+    # inputs += expand("%s/mapping/{sample}.nodup.bam" % R_FOLDER, sample=samples)
+    # inputs += expand("%s/mapping/{sample}.nodup.bam.bai" % R_FOLDER, sample=samples)
+    # inputs += expand("%s/mapping/{sample}_bqsr_1.table" % R_FOLDER, sample=samples)
+    # inputs += expand("%s/mapping/{sample}.nodup.recal.beforeReformat.bam" % R_FOLDER, sample=samples)
+    inputs += expand("%s/mapping/{sample}.nodup.recal.bam" % R_FOLDER, sample=samples)
+    inputs += expand("%s/mapping/{sample}.nodup.recal.bam.bai" % R_FOLDER, sample=samples)
+    inputs += expand("%s/qc/collect_hs_metrics/{sample}_hs_metrics.tsv" % R_FOLDER, sample=samples)
+    inputs += expand("%s/qc/samtools_stats/{sample}_stats.tsv" % R_FOLDER, sample=samples)
+    inputs += expand("%s/qc/samtools_flagstat/{sample}_flagstat.tsv" % R_FOLDER, sample=samples)
+    inputs += expand("%s/qc/mosdepth/{sample}.mosdepth.global.dist.txt" % R_FOLDER, sample=samples)
+    inputs += expand("%s/qc/ngs_checkmate/{tsample}_vs_{nsample}" % R_FOLDER,
+        get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples)
+    # +++++++++++++++++++++++
+    #### GERMLINE CALLING
+    # +++++++++++++++++++++++
+    # inputs += expand("%s/calling/germline_haplotype_caller/{nsample}.vcf.gz" % R_FOLDER, nsample=nsamples)
+    # inputs += expand("%s/calling/germline_filter_false_positives/{nsample}.vcf.gz" % R_FOLDER, nsample=nsamples)
+    # +++++++++++++++++++++++
+    #### GERMLINE ANNOTATION
+    # +++++++++++++++++++++++
+    # inputs += expand("%s/humandb/hg19_{resource}.txt" % config["params"]["annovar"]["path"], \
+    #     resource=config["params"]["annovar"]["protocol"])
+    inputs += expand("%s/annotation/germline_annovar/{nsample}.hg19_multianno.vcf" % R_FOLDER, nsample=nsamples)
+    # +++++++++++++++++++++++
+    #### PANEL OF NORMAL
+    # +++++++++++++++++++++++
+    # inputs += expand("%s/calling/pon_mutect2/{nsample}.vcf.gz" % R_FOLDER, nsample=nsamples)
+    # inputs += expand("%s/calling/pon_genomicsdb/{target}_{interval}" % R_FOLDER, \
+    #     get_allowed_pairs_target_interval(), target=targets, interval=intervals)
+    # inputs += expand("%s/calling/pon_create/pon_{target}_{interval}.vcf.gz" % R_FOLDER, \
+    #     get_allowed_pairs_target_interval(), target=targets, interval=intervals)
+    # inputs += expand("%s/calling/pon_sort/pon_sorted_{target}_{interval}.vcf.gz" % R_FOLDER, \
+    #     get_allowed_pairs_target_interval(), target=targets, interval=intervals)
+    # inputs += expand("%s/calling/pon_merge/pon.vcf.gz" % R_FOLDER)
+    # +++++++++++++++++++++++
+    # ## SOMATIC CALLING
+    # +++++++++++++++++++++++
+    # inputs += expand("%s/calling/somatic_mutect2/{tsample}_vs_{nsample}.vcf.gz" % R_FOLDER, \
+    #     get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples_na)
+    # inputs += expand("%s/calling/somatic_learn_read_orientation_model/{tsample}_vs_{nsample}_read-orientation_model.tar.gz" % R_FOLDER, \
+    #     get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples_na)
+    # inputs += expand("%s/calling/somatic_get_pileup_summaries/{tsample}_get_pileup_summaries.table" % R_FOLDER, \
+    #     tsample=tsamples)
+    #  inputs += expand("%s/calling/somatic_calculate_contamination/{tsample}_calculate_contamination.table" % R_FOLDER, \
+    #      tsample=tsamples)
+    # inputs += expand("%s/calling/somatic_filter_mutect_calls/{tsample}_vs_{nsample}.vcf.gz" % R_FOLDER, \
+    #     get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples_na)
+    # inputs += expand("%s/calling/somatic_maf2vcf/{tsample}_vs_{nsample}.vcf.gz" % R_FOLDER, \
+    #       get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples_na)
+    # inputs += expand("%s/calling/somatic_maf_filter_false_positives/{tsample}_vs_{nsample}.vcf.gz" % R_FOLDER, \
+    #       get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples_na)
+    # inputs += expand("%s/calling/somatic_maf_filter_outside_intersection/{tsample}_vs_{nsample}.vcf.gz" % R_FOLDER, \
+    #       get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples_na)
+    # inputs += expand("%s/calling/somatic_maf_filters/{tsample}_vs_{nsample}.tsv.gz" % R_FOLDER, \
+    #     get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples_na)
+    # inputs += expand("%s/calling/somatic_maf_filters/{tsample}_vs_{nsample}.vcf.gz" % R_FOLDER, \
+    #     get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples_na)
+    # inputs += expand("%s/calling/somatic_maf_select_pass/{tsample}_vs_{nsample}.vcf.gz" % R_FOLDER, \
+    #       get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples_na)
+    # +++++++++++++++++++++++
+    #### SOMATIC ANNOTATION
+    # +++++++++++++++++++++++
+    # inputs += expand("%s/INSTALL.pl" % config["params"]["vep"]["path"])
+    # inputs += ["%s/%s/%s_%s" % (config["params"]["vep"]["cache"], config["ref"]["species"], config["params"]["vep"]["release"], config["ref"]["build"])
+    # inputs += ["%s/Plugins/dbNSFP4.1a_%s.gz" % (config["params"]["vep"]["cache"],  config["ref"]["build"].lower())]
+    # inputs += ["%s/Plugins/LoFtool_scores.txt" % config["params"]["vep"]["cache"]]
+    # inputs += ["%s/Plugins/Condel/config/condel_SP.conf" % config["params"]["vep"]["cache"]]
+    # inputs += expand("%s/annotation/somatic_vep/{tsample}_vs_{nsample}.vcf" % R_FOLDER, \
+    #       get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples)
+    # inputs += expand("%s/annotation/somatic_vep/{tsample}_vs_{nsample}.tsv" % R_FOLDER, \
+    #       get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples)
+    # inputs += expand("%s/annotation/somatic_vep/{tsample}_vs_{nsample}.maf" % R_FOLDER, \
+    #       get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples)
+    # inputs += expand("%s/annotation/somatic_maf/{tsample}_vs_{nsample}.maf" % R_FOLDER, \
+    #       get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples_na)
+    # inputs += expand("%s/annotation/somatic_maf_oncokb/{tsample}_vs_{nsample}.maf" % R_FOLDER, \
+    #       get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples_na)
+    # inputs += expand("%s/annotation/somatic_maf_civic/{tsample}_vs_{nsample}.maf" % R_FOLDER, \
+    #       get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples_na)
+    # +++++++++++++++++++++++
+    # ## SOMATIC CNV
+    # +++++++++++++++++++++++
+    # inputs += expand("%s/calling/somatic_snp_pileup/{tsample}_vs_{nsample}.csv.gz" % R_FOLDER, \
+    #        get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples_na)
+    # inputs += expand("%s/calling/somatic_cnv_facets/{tsample}_vs_{nsample}.vcf.gz" % R_FOLDER, \
+    #        get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples_na)
+    # inputs += expand("%s/calling/somatic_cnv_chr_arm/{tsample}_vs_{nsample}.tsv" % R_FOLDER, \
+    #        get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples_na)
+    # inputs += expand("%s/calling/somatic_cnv_sum/{tsample}_vs_{nsample}.tsv" % R_FOLDER, \
+    #        get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples_na)
+    # inputs += expand("%s/calling/somatic_cnv_table/{tsample}_vs_{nsample}.tsv" % R_FOLDER, \
+    #           get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples_na)
+    # inputs += expand("%s/calling/somatic_cnv_gene_calls/{tsample}_vs_{nsample}.tsv.gz" % R_FOLDER, \
+    #           get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples_na)
+    # +++++++++++++++++++++++
+    #### SOMATIC MSI
+    # +++++++++++++++++++++++
+    # inputs += expand("%s/calling/somatic_msi_mantis/{tsample}_vs_{nsample}.tsv" % R_FOLDER, \
+    #           get_allowed_pairs_tumor_normal(), tsample=tsamples, nsample=nsamples)
+    # +++++++++++++++++++++++
+    #### AGGREGATE
+    # +++++++++++++++++++++++
+    if not config["skip_aggregate"]:
+        inputs += ["%s/aggregate/somatic_maf/somatic_calls_filters.tsv.gz" % R_FOLDER]
+        inputs += ["%s/aggregate/somatic_maf/somatic_calls.maf.gz" % R_FOLDER]
+        inputs += ["%s/aggregate/somatic_maf/somatic_calls_oncokb.maf.gz" % R_FOLDER]
+        inputs += ["%s/aggregate/somatic_maf/somatic_calls_civic.maf.gz" % R_FOLDER]
+        inputs += ["%s/aggregate/somatic_maf/somatic_calls_union_ann.maf.gz" % R_FOLDER]
+        inputs += ["%s/aggregate/somatic_cna/somatic_segments.tsv.gz" % R_FOLDER]
+        inputs += ["%s/aggregate/somatic_cna/somatic_calls_filters.tsv.gz" % R_FOLDER]
+        inputs += ["%s/aggregate/somatic_cna/somatic_calls.tsv.gz" % R_FOLDER]
+        inputs += ["%s/aggregate/somatic_cna/somatic_calls_oncokb.tsv.gz" % R_FOLDER]
+        inputs += ["%s/aggregate/somatic_cna/somatic_calls_civic.tsv.gz" % R_FOLDER]
+        inputs += ["%s/aggregate/somatic_cna/somatic_calls_union_ann.tsv.gz" % R_FOLDER]
+        inputs += ["%s/aggregate/somatic_cna/somatic_calls_summary_statistics.tsv.gz" % R_FOLDER]
+        inputs += ["%s/aggregate/somatic_cna/somatic_calls_per_chr_arm.tsv.gz" % R_FOLDER]
+        inputs += ["%s/aggregate/somatic_msi/somatic_msi.tsv" % R_FOLDER]
+        inputs += ["%s/aggregate/somatic_ppy/somatic_ppy.tsv" % R_FOLDER]
+
+    return inputs
+
+rule all:
+    input:
+        get_input_rule_all
+
+##### Modules #####
+
+include: "rules/setup.smk"
+# include: "rules/external_resources.smk"
+include: "rules/qc.smk"
+include: "rules/pon.smk"
+include: "rules/mapping.smk"
+include: "rules/calling.smk"
+include: "rules/annotation.smk"
+include: "rules/aggregate.smk"
+
+##### End messages #####
+
+onsuccess:
+    print("Workflow finished, no error")
+
+onerror:
+    print("An error occurred")

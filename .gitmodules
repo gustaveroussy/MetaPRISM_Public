@@ -1,0 +1,18 @@
+[submodule "code/functions/tools/UltiSig"]
+	path = code/functions/tools/UltiSig
+	url = https://github.com/ypradat/UltiSig
+[submodule "code/functions/tools/comut"]
+	path = code/functions/tools/comut
+	url = https://github.com/ypradat/comut
+[submodule "code/functions/tools/forester"]
+	path = code/functions/tools/forester
+	url = https://github.com/ypradat/forester
+[submodule "code/functions/tools/tableExtra"]
+	path = code/functions/tools/tableExtra
+	url = https://github.com/ypradat/tableExtra
+[submodule "code/functions/tools/PrettyPy"]
+	path = code/functions/tools/PrettyPy
+	url = https://github.com/ypradat/PrettyPy
+[submodule "code/pipelines/rnafusion"]
+	path = code/pipelines/rnafusion
+	url = https://github.com/nf-core/rnafusion

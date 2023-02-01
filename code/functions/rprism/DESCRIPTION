@@ -1,0 +1,34 @@
+Package: rprism
+Title: Support for the Meta PRISM project
+Version: 2.2.5
+Authors@R: 
+    person(given = "Yoann",
+           family = "Pradat",
+           role = c("aut", "cre"),
+           email = "yoann.pradat@centralesupelec.fr")
+Maintainer: 'Yoann Pradat' <yoann.pradat@centralesupelec.fr>
+Description: Meta PRISM project is an institutional project from the French University Hospital Gustave Roussy. This project aims at describing the molecular landscape of metastatic cancers from all solid tumor types.  
+License: BSD_3_clause + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.2.1
+URL: https://github.com/gustaveroussy/MetaPRISM/tree/master/functions/rprism
+Depends:
+    R (>= 3.0)
+Imports:
+    Exact,
+    doParallel,
+    dplyr,
+    foreach,
+    magrittr,
+    rlang,
+    readr,
+    readxl,
+    stats,
+    tibble,
+    tidyr,
+    writexl,
+    yaml
+Suggests: 
+    testthat

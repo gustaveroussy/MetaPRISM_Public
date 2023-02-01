@@ -1,0 +1,9 @@
+---
+name: bash_perl
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - conda-forge:bash=5.0.011
+  - conda-forge:gawk=5.1.0
+  - conda-forge:perl=5.26.2

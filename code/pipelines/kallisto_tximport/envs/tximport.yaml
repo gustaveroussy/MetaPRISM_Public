@@ -1,0 +1,10 @@
+---
+name: tximport
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+  - r
+dependencies:
+  - bioconda:bioconductor-tximport=1.16.0
+  - bioconda:bioconductor-rhdf5=2.32.0 

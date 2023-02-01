@@ -1,0 +1,22 @@
+---
+name: MetaPrism_RNASeq_Pipeline
+channels:
+  - bioconda
+  - conda-forge
+  - defaults
+dependencies:
+  - conda-forge::python=3.8.2
+  - conda-forge::pytest=5.4.2
+  - conda-forge::datrie=0.8.2
+  - conda-forge::git=2.26.2
+  - conda-forge::jinja2=2.11.2
+  - conda-forge::pygraphviz=1.5
+  - conda-forge::flask=1.1.2
+  - conda-forge::pandas=1.0.3
+  - conda-forge::zlib=1.2.11
+  - conda-forge::openssl=1.1.1g
+  - conda-forge::networkx=2.4
+  - bioconda::snakemake=5.20.1
+  - conda-forge::ipython=7.16.1
+  - conda-forge::bashlex=0.15
+  - conda-forge::black=19.10b0

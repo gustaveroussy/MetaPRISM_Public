@@ -1,0 +1,14 @@
+name: metaprism_r
+channels:
+  - anaconda
+  - bioconda
+  - conda-forge
+  - r
+  - defaults
+dependencies:
+  - r-argparse=2.1.1
+  - r-base=4.1.1
+  - r-devtools=2.4.4
+  - r-dplyr=1.0.7
+  - r-readr=2.0.1
+  - r-readxl=1.3.1

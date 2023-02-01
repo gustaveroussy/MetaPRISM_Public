@@ -1,0 +1,25 @@
+name: metaprism_main
+channels:
+    - https://repo.anaconda.com/pkgs/free
+    - bioconda
+    - conda-forge
+    - r
+    - defaults
+dependencies:
+    - bedtools=2.30.0
+    - bcftools=1.9
+    - bwa=0.7.17
+    - cnv_facets=0.14.0
+    - cutadapt=1.18
+    - fastp=0.20.0
+    - fastqc=0.11.8
+    - gatk4=4.1.8.1
+    - htslib=1.9
+    - mosdepth=0.2.5
+    - perl=5.32.1
+    - picard=2.20.3
+    - samtools=1.9
+    - snp-pileup=0.5.14
+    - strelka=2.9.10
+    - vcf2maf=1.6.18
+    - vcflib=1.0.0_rc2

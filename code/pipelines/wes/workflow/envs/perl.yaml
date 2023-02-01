@@ -1,0 +1,20 @@
+name: metaprism_perl
+channels:
+    - bioconda
+    - conda-forge
+    - defaults
+dependencies:
+    - bedtools=2.30.0
+    - htslib=1.9
+    - gxx_linux-64
+    - make=4.3
+    - perl=5.26.2
+    - perl-archive-zip=1.64
+    - perl-bio-db-hts=3.01
+    - perl-dbi=1.642
+    - perl-dbd-mysql=4.046
+    - perl-extutils-cbuilder
+    - perl-module-build
+    - perl-try-tiny=0.30
+    - samtools=1.9
+    - tabix=1.11

@@ -1,0 +1,9 @@
+design: design.tsv
+threads: 20
+database:
+  db_name: NONCODE 
+  content: all
+params:
+  trim_galore_extra: "-q 20 --stringency 3 --gzip --length 20"
+  kallisto_index_extra: ""
+  kallisto_quant_extra: "--bias"

@@ -1,0 +1,224 @@
+samples: config/samples.tsv
+imeta: config/imeta_output.tsv
+tumor_normal_pairs: config/tumor_normal_pairs.tsv
+
+ref:
+    # ensembl species name
+    species: homo_sapiens
+    # genome build
+    build: GRCh37
+    # fasta file
+    fasta: /path/to/resources/b37_gatk/human_g1k_v37.fasta
+    # 2bit file
+    2bit: /path/to/resources/b37_gatk/human_g1k_v37.fasta.2bit
+    # dict file
+    dict: /path/to/resources/b37_gatk/human_g1k_v37.dict
+
+
+target_files:
+    # Paths to the different capture kits reladed files used during DNA library preparation
+    target:
+        # required due to the renaming of TWISBioscienceCustomIG_Targeted ...
+        SureSelect_CR: SureSelect_CR
+        SureSelect_CR2: SureSelect_CR2
+        SureSelect_V5: SureSelect_V5
+        TWISBioscienceCustomIG_Targeted: TWISBioscienceCustomIG_Targeted_liftover_hg19
+        TWISBioscienceCustomIG_TargetedV2: TWISBioscienceCustomIG_TargetedV2_liftover_hg19
+        all_targets_intersect: all_targets_intersect 
+    bed:
+        SureSelect_CR: /path/to/resources/target_files/SureSelect_CR.bed
+        SureSelect_CR2: /path/to/resources/target_files/SureSelect_CR2.bed
+        SureSelect_V5: /path/to/resources/target_files/SureSelect_V5.bed
+        TWISBioscienceCustomIG_Targeted: /path/to/resources/target_files/TWISBioscienceCustomIG_Targeted_liftover_hg19.bed
+        TWISBioscienceCustomIG_TargetedV2: /path/to/resources/target_files/TWISBioscienceCustomIG_TargetedV2_liftover_hg19.bed
+        all_targets_intersect: /path/to/resources/target_files/all_targets_intersect.bed
+        intersections: /path/to/resources/target_files_intersect
+    bed_padded:
+        SureSelect_CR: /path/to/resources/target_files/SureSelect_CR_padded_10n.bed
+        SureSelect_CR2: /path/to/resources/target_files/SureSelect_CR2_padded_10n.bed
+        SureSelect_V5: /path/to/resources/target_files/SureSelect_V5_padded_10n.bed
+        TWISBioscienceCustomIG_Targeted: /path/to/resources/target_files/TWISBioscienceCustomIG_Targeted_liftover_hg19_padded_10n.bed
+        TWISBioscienceCustomIG_TargetedV2: /path/to/resources/target_files/TWISBioscienceCustomIG_TargetedV2_liftover_hg19_padded_10n.bed
+        all_targets_intersect: /path/to/resources/target_files/all_targets_intersect_padded_10n.bed
+        intersections: /path/to/resources/target_files_intersect
+    intervals:
+        SureSelect_CR: /path/to/resources/target_files/SureSelect_CR.intervals
+        SureSelect_CR2: /path/to/resources/target_files/SureSelect_CR2.intervals
+        SureSelect_V5: /path/to/resources/target_files/SureSelect_V5.intervals
+        TWISBioscienceCustomIG_Targeted: /path/to/resources/target_files/TWISBioscienceCustomIG_Targeted_liftover_hg19.intervals
+        TWISBioscienceCustomIG_TargetedV2: /path/to/resources/target_files/TWISBioscienceCustomIG_TargetedV2_liftover_hg19.intervals
+        all_targets_intersect: /path/to/resources/target_files/all_targets_intersect.intervals
+    intervals_padded:
+        SureSelect_CR: /path/to/resources/target_files/SureSelect_CR_padded_10n.intervals
+        SureSelect_CR2: /path/to/resources/target_files/SureSelect_CR2_padded_10n.intervals
+        SureSelect_V5: /path/to/resources/target_files/SureSelect_V5_padded_10n.intervals
+        TWISBioscienceCustomIG_Targeted: /path/to/resources/target_files/TWISBioscienceCustomIG_Targeted_liftover_hg19_padded_10n.intervals
+        TWISBioscienceCustomIG_TargetedV2: /path/to/resources/target_files/TWISBioscienceCustomIG_TargetedV2_liftover_hg19_padded_10n.intervals
+        all_targets_intersect: /path/to/resources/target_files/all_targets_intersect_padded_10n.intervals
+    intervals_pon:
+        SureSelect_CR: /path/to/resources/target_files/SureSelect_CR_for_pon
+        SureSelect_CR2: /path/to/resources/target_files/SureSelect_CR2_for_pon
+        SureSelect_V5: /path/to/resources/target_files/SureSelect_V5_for_pon
+        TWISBioscienceCustomIG_Targeted: /path/to/resources/target_files/TWISBioscienceCustomIG_Targeted_liftover_hg19_for_pon
+        TWISBioscienceCustomIG_TargetedV2: /path/to/resources/target_files/TWISBioscienceCustomIG_TargetedV2_liftover_hg19_for_pon
+        all_targets_intersect: /path/to/resources/target_files/all_targets_intersect_for_pon
+
+
+params:
+    annovar:
+        path: /path/to/external/annovar
+        buildver: hg19
+        protocol:
+            # FASTA sequences for all annotated transcripts in RefSeq Gene
+            - refGene
+            # dbSNP150 with allelic splitting and left-normalization
+            - avsnp150
+            # gnomAD exome collection (v2.1.1), with "AF AF_popmax AF_male AF_female AF_raw AF_afr AF_sas AF_amr AF_eas
+            # AF_nfe AF_fin AF_asj AF_oth non_topmed_AF_popmax non_neuro_AF_popmax non_cancer_AF_popmax
+            # controls_AF_popmax" header
+            - gnomad211_exome
+            # Great Middle East allele frequency including NWA (northwest Africa), NEA (northeast Africa), AP (Arabian
+            # peninsula), Israel, SD (Syrian desert), TP (Turkish peninsula) and CA (Central Asia)
+            - gme
+            # M-CAP scores for non-synonymous variants
+            - mcap
+            # REVEL scores for non-synonymous variants
+            - revel
+            # prioritize the disease-causing probability of intronic SNVs
+            - regsnpintron
+            # whole-genome GERP++ scores greater than 2 (RS score threshold of 2 provides high sensitivity while still
+            # strongly enriching for truly constrained sites. )
+            - "gerp++gt2"
+            # Clinvar version 20210501 with separate columns (CLNALLELEID CLNDN CLNDISDB CLNREVSTAT CLNSIG)
+            - clinvar_20210501
+            # InterVar: clinical interpretation of missense variants (indels not supported)
+            - intervar_20180118
+            # A database containing the maximum allele frequency from 1000G, ESP6500, ExAC and CG46
+            - popfreq_max_20150413
+            # whole-exome SIFT, PolyPhen2 HDIV, PolyPhen2 HVAR, LRT, MutationTaster, MutationAssessor, FATHMM, PROVEAN,
+            # MetaSVM, MetaLR, VEST, M-CAP, CADD, GERP++, DANN, fathmm-MKL, Eigen, GenoCanyon, fitCons, PhyloP and SiPhy
+            # scores from dbNSFP version 4.2a
+            - dbnsfp42a
+            # COSMIC database version 70. Please note that COSMIC will no longer be updated due to license
+            # restrictions. The latest version from ANNOVAR is cosmic70.
+            - cosmic70
+            # International Cancer Genome Consortium version 28
+            - icgc28
+    civic:
+        code_dir: /path/to/external/CivicAnnotator
+        data_dir: /path/to/external/CivicAnnotator/data
+        gene_list: /path/to/external/CivicAnnotator/data/01-Jan-2022-GeneSummaries.tsv
+        evidences: /path/to/external/CivicAnnotator/data/01-Jan-2022-ClinicalEvidenceSummaries_Annotated.xlsx
+        run_per_sample:
+          cna: false
+          maf: false
+        rules_clean: /path/to/external/CivicAnnotator/data/CIViC_Curation_And_Rules_Mutation.xlsx
+    cnv:
+        bed: /path/to/resources/gene_set/Homo_sapiens.GRCh37.87.gff3.gene.bed
+        calls_threshold: 10
+        facets:
+            cvals:
+                pre: 25
+                pro: 500
+            gbuild: hg19
+        chr_arm_rules: /path/to/resources/facets_suite/facets_suite_arm_level_rules.xlsx
+        cna_cat_rules: /path/to/resources/facets_suite/facets_scna_categories_rules.xlsx
+        cnv_facets:
+          code_dir: /path/to/external/cnv_facets
+    fastp:
+        # Reads shorter than length_required will be discarded
+        adapters: /path/to/resources/qc/adapters_for_fastp.tsv
+        length_required: 25
+    fastqc:
+        adapters: /path/to/resources/qc/adapters_for_fastqc.tsv
+    gatk:
+        BaseRecalibrator:
+            known_sites: /path/to/resources/b37_gatk/af-only-gnomad.raw.sites.b37.vcf.gz
+        CreateSomaticPanelOfNormals:
+            min_sample_count: 2
+        GenotypeGVCFs: ""
+        GetPileupSummaries:
+            # A common germline variant sites VCF, with population allele frequencies (AF) in the INFO field.
+            # This resource must contain biallelic SNPs
+            variant: /path/to/resources/b37_gatk/small_exac_common_3_b37.vcf
+        HaplotypeCaller:
+            # The minimum phred-scaled confidence threshold at which variants should be called. Only variant sites with
+            # QUAL equal or greater than this threshold will be called.
+            stand_min_conf: 20
+        Mutect2:
+            # A resource, such as gnomAD, containing population allele frequencies of common and rare variants.
+            germline_resource: /path/to/resources/b37_gatk/af-only-gnomad.raw.sites.b37.vcf.gz
+        VariantRecalibrator: ""
+    mantis:
+        code_dir: /path/to/external/mantis
+        ms_dir: /path/to/resources/microsatellites
+        buildver: hg19
+        ms_bed: /path/to/resources/microsatellites/paper_regions_liftover_hg19.bed
+    ngs_checkmate:
+        code_dir: /path/to/external/NGSCheckMate
+        snp_bed: /path/to/external/NGSCheckMate/SNP/SNP_GRCh37_hg19_woChr.bed
+    oncokb:
+        code_dir: /path/to/external/oncokb-annotator
+        data_dir: /path/to/external/oncokb-annotator/data
+        gene_list: /path/to/external/oncokb-annotator/data/cancerGeneList_oncokb_annotated.tsv
+        run_per_sample:
+          cna: false
+          maf: false
+        token: XXXX
+        rules_clean: /path/to/resources/oncokb/OncoKB_Curation_And_Rules.xlsx
+    picard:
+        MarkDuplicates: 
+            remove_duplicates: true
+        CollectHsMetrics:
+            interval: /path/to/resources/target_files
+    vcf2maf:
+        path: /path/to/external/vcf2maf
+    vep:
+        path: /path/to/external/vep
+        cache: /path/to/external/vep/cache
+        fasta: homo_sapiens/104_GRCh37/Homo_sapiens.GRCh37.75.dna.primary_assembly.fa
+        plugins:
+            # Add any plugin from https://www.ensembl.org/info/docs/tools/vep/script/vep_plugins.html
+            # Plugin args can be passed as well, e.g. "LoFtool,path/to/custom/scores.txt".
+            - CADD
+            - Condel
+            - dbNSFP
+            - LoFtool
+        plugins_version:
+            CADD: "1.6"
+            dbNSFP: "4.1"
+        plugins_data:
+            CADD:
+                - /path/to/external/vep/cache/Plugins/whole_genome_SNVs_1.6_grch37.tsv.gz
+                - /path/to/external/vep/cache/Plugins/InDels_1.6_grch37.tsv.gz
+            Condel:
+                - /path/to/external/vep/cache/Plugins/Condel/config/condel_SP.conf
+            dbNSFP:
+                - /path/to/external/vep/cache/Plugins/dbNSFP4.1a_grch37.gz
+            LoFtool:
+                - /path/to/external/vep/cache/Plugins/LoFtool_scores.txt
+        dbnsfp:
+            - SIFT_score
+            - SIFT_pred
+            - Polyphen2_HVAR_score
+            - Polyphen2_HVAR_pred
+            - CADD_raw_hg19
+            - DEOGEN2_score
+            - REVEL_score
+            - VEST4_score
+            - FATHMM_score
+            - fathmm-MKL_coding_score 
+            - MutationAssessor_score
+            - MutationAssessor_pred
+            - MutationTaster_score
+            - MutationTaster_pred
+            - PROVEAN_score
+            - "GERP++_RS"
+            - clinvar_id
+            - clinvar_clnsig
+            - Ensembl_proteinid
+            - Ensembl_transcriptid
+        # ensembl release
+        release: 104
+
+skip_aggregate: false
