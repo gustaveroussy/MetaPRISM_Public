@@ -177,7 +177,8 @@ load_alterations_and_select_samples <- function(args, select_samples=T){
 
     mask_in <- df_alt[[col_sam]] %in% df_cln[[col_sam_cln]][!is.na(df_cln[[col_sam_cln]])] 
     df_alt <- df_alt[mask_in,]
-    cat("-selected", paste0(sum(mask_in), "/", length(mask_in)) , "alterations from in-design DNA samples ...\n")
+    cat("-selected", paste0(sum(mask_in), "/", length(mask_in)) , "alterations from in-design", args$sample_type,
+        "samples ...\n")
 
     # add clinical data if missing
     cols_cln <- c(col_sub, "Tumor_Type")
@@ -194,7 +195,8 @@ load_alterations_and_select_samples <- function(args, select_samples=T){
       df_sam <- df_sam %>% filter(.data[[paste0("Use_", args$selection_name)]]==1)
       mask_in <- df_alt[[col_sam]] %in% df_sam[[col_sam]]
       df_alt <- df_alt[mask_in,]
-      cat("-selected", paste0(sum(mask_in), "/", length(mask_in)) , "alterations from selected DNA samples ...\n")
+      cat("-selected", paste0(sum(mask_in), "/", length(mask_in)) , "alterations from selected", args$sample_type,
+          "samples ...\n")
       cat("-number of unique subjects", df_alt %>% distinct(.data[[col_sub]]) %>% nrow(), "\n")
     }
 

@@ -82,7 +82,7 @@ rule mutpanning_results:
     conda: config["setup"]["MetaPrism"]
     output:
         plot="%s/mutpanning/table_extra_mutpanning.pdf" % R_FOLDER,
-        plot_paper="%s/FS12.pdf" % F_FOLDER,
+        plot_paper="%s/FS8.pdf" % F_FOLDER,
         data="%s/mutpanning/results_mutpanning.tsv" % R_FOLDER
     params:
         cohorts=config["data"]["cohorts"],

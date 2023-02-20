@@ -7,8 +7,7 @@ the analysis performed in each folder.
     - Contains scripts for preparing tables for META-PRISM, MET500, and TCGA that combine annotated point mutations and
       small indels, annotated focal SCNAs, annotated fusions, annotated MSI status, annotated TMB status, and annotated
       AR-V7 expression score.
-    - Hosts the code for drawing Fig. 3A, Fig. 3B, Fig. 5A, Fig. 5B, Supplementary Fig. S10, Supplementary Fig. S12,
-    and Supplementary Fig. S13.
+    - Hosts the code for drawing Fig. 3A, Fig. 3B, Fig. 5A, Fig. 5B, Supplementary Fig. S9, and Supplementary Fig. S10.
     - Contains scripts for preparing count tables of the number of DNA (WES-derived only) or DNA & RNA
     (WES- and RNAseq-derived) events per gene, per pathway, or in total.
 - `common`
@@ -38,20 +37,21 @@ the analysis performed in each folder.
 - `mutational_signatures`
     - Contains scripts for performing the mutational signature analysis on WES samples from META-PRISM, MET500, and
       TCGA.
-    - Hosts the code for drawing Fig. 2B (top), Fig. 2B (bot), and Supplementary Fig. 4.
+    - Hosts the code for drawing Fig. 2B (top), Fig. 2B (bot), and Supplementary Fig. S4.
 - `numbers_paper`
     - Contains scripts for computing all the numbers written in the text.
 - `somatic_cnas`
     - Contains scripts for preparing count tables of the number of SCNA events per gene or per pathway.
-    - Hosts the code for drawing Fig. 2C, Fig. 2D, Supplementary Fig. S10, and Supplementary Fig. S11.
+    - Hosts the code for drawing Fig. 2C, Fig. 2D, Supplementary Fig. S6, and Supplementary Fig. S7.
 - `somatic_mutations`
     - Contains scripts for preparing inputs to Mutpanning and for running it.
-    - Hosts the code for drawing Fig. 2A and Supplementary Fig. S12.
+    - Hosts the code for drawing Fig. 2A and Supplementary Fig. S8.
     - Contains scripts for preparing count tables of the number of mutations per gene, per pathway, or in total.
 - `survival_analysis`
     - Contains scripts for running survival models.
     - Hosts the code for drawing all Kaplan-Meier curves including Fig. 2E and Fig. 7A.
     - Hosts the code for Fig. 7C, Fig. 7D, Fig. 7E, Fig. 7F.
+    - Hosts the code for drawing Supplementary Fig. S11.
 - `treatment_resistances`
     - Contains scripts for processing manual annotations of associations between treatments and oncogenic alterations.
     - Hosts the code for drawing Fig. 6.

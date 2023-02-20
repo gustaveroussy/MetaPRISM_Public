@@ -1,147 +1,147 @@
-# rule aggregate_tables_samples:
-#     log:
-#         "workflow/logs/aggregate_tables_samples_{cohort}_{algo}.log"
-#     input:
-#         "../common/logs/setup_conda.done"
-#     conda: config["setup"]["MetaPrism"]
-#     output:
-#         agg="%s/{cohort}/rna/{algo}/{cohort}_{algo}.tsv.gz" % D_FOLDER
-#     params:
-#         output_list="%s/{cohort}/rna/{algo}/sample_list.tsv" % D_FOLDER,
-#         data_folder=D_FOLDER,
-#     resources:
-#         mem_mb=16000,
-#         partition="shortq",
-#         time_min=30
-#     threads: 1
-#     shell:
-#         """python workflow/scripts/00.1_aggregate_tables_samples.py \
-#             --cohort {wildcards.cohort} \
-#             --algo_folder {wildcards.algo} \
-#             --data_folder {params.data_folder} \
-#             --output_list {params.output_list} \
-#             --output_agg {output.agg} &> {log}
-#         """
-# 
-# 
-# rule aggregate_tables_callers:
-#     log:
-#         "workflow/logs/aggregate_tables_callers_{cohort}.log"
-#     input:
-#         agg=get_input_aggregate_tables_callers,
-#         env="../common/logs/setup_conda.done"
-#     conda: config["setup"]["MetaPrism"]
-#     output:
-#         "%s/{cohort}/rna/fusions/{cohort}_aggregated_callers.tsv.gz" % D_FOLDER
-#     params:
-#         algos=lambda w: config["data"]["aggregate"][w.cohort]["algos"]
-#     resources:
-#         mem_mb=30000,
-#         partition="shortq",
-#         time_min=60
-#     threads: 1
-#     shell:
-#         """Rscript workflow/scripts/00.2_aggregate_tables_callers.R \
-#             --cohort {wildcards.cohort} \
-#             --algos {params.algos} \
-#             --output {output} \
-#             --log {log}"""
-# 
-# 
-# rule annotate_fusions_FusionAnnotator_1:
-#     log:
-#         "workflow/logs/annotate_fusions_FusionAnnotator_1_{cohort}.log"
-#     input:
-#         table="%s/{cohort}/rna/fusions/{cohort}_aggregated_callers.tsv.gz" % D_FOLDER,
-#         env="../common/logs/setup_conda.done"
-#     conda:
-#         config["setup"]["MetaPrism"]
-#     output:
-#         temp("%s/{cohort}/rna/fusions/{cohort}_aggregated_FusionAnnotator_1.tsv" % D_FOLDER)
-#     resources:
-#         mem_mb=16000,
-#         partition="shortq",
-#         time_min=60
-#     threads: 1
-#     shell:
-#         """python workflow/scripts/00.3_annotate_fusions_FusionAnnotator_1.py --input {input.table} \
-#             --output {output} &> {log}"""
-# 
-# 
-# rule annotate_fusions_FusionAnnotator_2:
-#     benchmark:
-#         "workflow/benchmarks/annotate_fusions_FusionAnnotator_2_{cohort}.tsv"
-#     log:
-#         "workflow/logs/annotate_fusions_FusionAnnotator_2_{cohort}.log"
-#     input:
-#         "%s/{cohort}/rna/fusions/{cohort}_aggregated_FusionAnnotator_1.tsv" % D_FOLDER
-#     conda:
-#         "../envs/FusionAnnotator.yaml"
-#     output:
-#         temp("%s/{cohort}/rna/fusions/{cohort}_aggregated_FusionAnnotator_2.tsv" % D_FOLDER)
-#     params:
-#         app=config["data"]["fusion_annotator"],
-#         genome_lib_dir=config["data"]["resources"]["genome_lib_dir"]
-#     resources:
-#         mem_mb=16000,
-#         partition="shortq",
-#         time_min=60
-#     threads: 1
-#     shell:
-#         """{params.app} --genome_lib_dir {params.genome_lib_dir} \
-#             --annotate {input} \
-#             --fusion_name_col Fusion_Id 1> {output} 2> {log}"""
-# 
-# 
-# rule annotate_fusions_FusionAnnotator_3:
-#     log:
-#         "workflow/logs/annotate_fusions_FusionAnnotator_3_{cohort}.log"
-#     input:
-#         fusions="%s/{cohort}/rna/fusions/{cohort}_aggregated_callers.tsv.gz" % D_FOLDER,
-#         annots="%s/{cohort}/rna/fusions/{cohort}_aggregated_FusionAnnotator_2.tsv" % D_FOLDER,
-#         env="../common/logs/setup_conda.done"
-#     conda:
-#         config["setup"]["MetaPrism"]
-#     output:
-#         "%s/{cohort}/rna/fusions/{cohort}_annotated_FusionAnnotator.tsv.gz" % D_FOLDER
-#     resources:
-#         mem_mb=16000,
-#         partition="shortq",
-#         time_min=60
-#     threads: 1
-#     shell:
-#         """python workflow/scripts/00.3_annotate_fusions_FusionAnnotator_3.py --input_fusions {input.fusions} \
-#             --input_annots {input.annots} \
-#             --output {output} &> {log}"""
-# 
-# 
-# rule annotate_fusions_custom:
-#     log:
-#         "workflow/logs/annotate_fusions_custom_{cohort}.log"
-#     input:
-#         fusions="%s/{cohort}/rna/fusions/{cohort}_annotated_FusionAnnotator.tsv.gz" % D_FOLDER,
-#         env="../common/logs/setup_conda.done"
-#     conda:
-#         config["setup"]["MetaPrism"]
-#     output:
-#         "%s/{cohort}/rna/fusions/{cohort}_annotated.tsv.gz" % D_FOLDER
-#     params:
-#         drivers=config["data"]["resources"]["drivers"],
-#         gencode=config["data"]["resources"]["gencode"],
-#         fusions_lists=config["data"]["resources"]["fusions_lists"]
-#     resources:
-#         mem_mb=8000,
-#         partition="shortq",
-#         time_min=15
-#     threads: 1
-#     shell:
-#         """Rscript workflow/scripts/00.4_annotate_fusions_custom.R \
-#             --input {input.fusions} \
-#             --fusions_lists {params.fusions_lists} \
-#             --gencode {params.gencode} \
-#             --drivers {params.drivers} \
-#             --output {output} \
-#             --log {log}"""
+rule aggregate_tables_samples:
+    log:
+        "workflow/logs/aggregate_tables_samples_{cohort}_{algo}.log"
+    input:
+        "../common/logs/setup_conda.done"
+    conda: config["setup"]["MetaPrism"]
+    output:
+        agg="%s/{cohort}/rna/{algo}/{cohort}_{algo}.tsv.gz" % D_FOLDER
+    params:
+        output_list="%s/{cohort}/rna/{algo}/sample_list.tsv" % D_FOLDER,
+        data_folder=D_FOLDER,
+    resources:
+        mem_mb=16000,
+        partition="shortq",
+        time_min=30
+    threads: 1
+    shell:
+        """python workflow/scripts/00.1_aggregate_tables_samples.py \
+            --cohort {wildcards.cohort} \
+            --algo_folder {wildcards.algo} \
+            --data_folder {params.data_folder} \
+            --output_list {params.output_list} \
+            --output_agg {output.agg} &> {log}
+        """
+
+
+rule aggregate_tables_callers:
+    log:
+        "workflow/logs/aggregate_tables_callers_{cohort}.log"
+    input:
+        agg=get_input_aggregate_tables_callers,
+        env="../common/logs/setup_conda.done"
+    conda: config["setup"]["MetaPrism"]
+    output:
+        "%s/{cohort}/rna/fusions/{cohort}_aggregated_callers.tsv.gz" % D_FOLDER
+    params:
+        algos=lambda w: config["data"]["aggregate"][w.cohort]["algos"]
+    resources:
+        mem_mb=30000,
+        partition="shortq",
+        time_min=60
+    threads: 1
+    shell:
+        """Rscript workflow/scripts/00.2_aggregate_tables_callers.R \
+            --cohort {wildcards.cohort} \
+            --algos {params.algos} \
+            --output {output} \
+            --log {log}"""
+
+
+rule annotate_fusions_FusionAnnotator_1:
+    log:
+        "workflow/logs/annotate_fusions_FusionAnnotator_1_{cohort}.log"
+    input:
+        table="%s/{cohort}/rna/fusions/{cohort}_aggregated_callers.tsv.gz" % D_FOLDER,
+        env="../common/logs/setup_conda.done"
+    conda:
+        config["setup"]["MetaPrism"]
+    output:
+        temp("%s/{cohort}/rna/fusions/{cohort}_aggregated_FusionAnnotator_1.tsv" % D_FOLDER)
+    resources:
+        mem_mb=16000,
+        partition="shortq",
+        time_min=60
+    threads: 1
+    shell:
+        """python workflow/scripts/00.3_annotate_fusions_FusionAnnotator_1.py --input {input.table} \
+            --output {output} &> {log}"""
+
+
+rule annotate_fusions_FusionAnnotator_2:
+    benchmark:
+        "workflow/benchmarks/annotate_fusions_FusionAnnotator_2_{cohort}.tsv"
+    log:
+        "workflow/logs/annotate_fusions_FusionAnnotator_2_{cohort}.log"
+    input:
+        "%s/{cohort}/rna/fusions/{cohort}_aggregated_FusionAnnotator_1.tsv" % D_FOLDER
+    conda:
+        "../envs/FusionAnnotator.yaml"
+    output:
+        temp("%s/{cohort}/rna/fusions/{cohort}_aggregated_FusionAnnotator_2.tsv" % D_FOLDER)
+    params:
+        app=config["data"]["fusion_annotator"],
+        genome_lib_dir=config["data"]["resources"]["genome_lib_dir"]
+    resources:
+        mem_mb=16000,
+        partition="shortq",
+        time_min=60
+    threads: 1
+    shell:
+        """{params.app} --genome_lib_dir {params.genome_lib_dir} \
+            --annotate {input} \
+            --fusion_name_col Fusion_Id 1> {output} 2> {log}"""
+
+
+rule annotate_fusions_FusionAnnotator_3:
+    log:
+        "workflow/logs/annotate_fusions_FusionAnnotator_3_{cohort}.log"
+    input:
+        fusions="%s/{cohort}/rna/fusions/{cohort}_aggregated_callers.tsv.gz" % D_FOLDER,
+        annots="%s/{cohort}/rna/fusions/{cohort}_aggregated_FusionAnnotator_2.tsv" % D_FOLDER,
+        env="../common/logs/setup_conda.done"
+    conda:
+        config["setup"]["MetaPrism"]
+    output:
+        "%s/{cohort}/rna/fusions/{cohort}_annotated_FusionAnnotator.tsv.gz" % D_FOLDER
+    resources:
+        mem_mb=16000,
+        partition="shortq",
+        time_min=60
+    threads: 1
+    shell:
+        """python workflow/scripts/00.3_annotate_fusions_FusionAnnotator_3.py --input_fusions {input.fusions} \
+            --input_annots {input.annots} \
+            --output {output} &> {log}"""
+
+
+rule annotate_fusions_custom:
+    log:
+        "workflow/logs/annotate_fusions_custom_{cohort}.log"
+    input:
+        fusions="%s/{cohort}/rna/fusions/{cohort}_annotated_FusionAnnotator.tsv.gz" % D_FOLDER,
+        env="../common/logs/setup_conda.done"
+    conda:
+        config["setup"]["MetaPrism"]
+    output:
+        "%s/{cohort}/rna/fusions/{cohort}_annotated.tsv.gz" % D_FOLDER
+    params:
+        drivers=config["data"]["resources"]["drivers"],
+        gencode=config["data"]["resources"]["gencode"],
+        fusions_lists=config["data"]["resources"]["fusions_lists"]
+    resources:
+        mem_mb=8000,
+        partition="shortq",
+        time_min=15
+    threads: 1
+    shell:
+        """Rscript workflow/scripts/00.4_annotate_fusions_custom.R \
+            --input {input.fusions} \
+            --fusions_lists {params.fusions_lists} \
+            --gencode {params.gencode} \
+            --drivers {params.drivers} \
+            --output {output} \
+            --log {log}"""
 
 
 rule filter_fusions:

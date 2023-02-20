@@ -18,7 +18,7 @@ rule draw_cna_summary:
                  "%s/other_plots/boxplot_chr_gains_and_chr_losses_prism_wgd.pdf",
                  "%s/other_plots/boxplot_ogs_and_tsgs_prism_wgd.pdf"],
         plots_paper = ["%s/%s" % (F_FOLDER, x) for x \
-            in ["F2c.eps", "F2d.eps", "FS11a.pdf", "FS11b.pdf", "FS11c.pdf", "FS11d.pdf"]]
+            in ["F2c.eps", "F2d.eps", "FS7a.pdf", "FS7b.pdf", "FS7c.pdf", "FS7d.pdf"]]
     params:
         cohorts = config["data"]["cohorts"],
     threads: 1
@@ -50,7 +50,7 @@ rule draw_cna_barplots:
     conda: config["setup"]["MetaPrism"]
     output:
         plot = "%s/other_plots/barplots_main_genes.pdf" % R_FOLDER,
-        plot_paper = "%s/FS11d-e.pdf" % F_FOLDER
+        plot_paper = "%s/FS7d-e.pdf" % F_FOLDER
     params:
         cohorts = config["data"]["cohorts"],
     threads: 1

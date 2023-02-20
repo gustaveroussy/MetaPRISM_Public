@@ -14,7 +14,7 @@ rule draw_heatmap_chr_arm:
     output:
         tables = "%s/heatmap_chr_arm/tables_{alterations}.xlsx" % R_FOLDER,
         plot = "%s/heatmap_chr_arm/heatmap_{alterations}.pdf" % R_FOLDER,
-        plot_paper = "%s/FS10_{alterations}.pdf" % F_FOLDER
+        plot_paper = "%s/FS6_{alterations}.pdf" % F_FOLDER
     params:
         cohorts = config["data"]["cohorts"],
         min_counts_evt = lambda w: [config["heatmap_chr_arm"]["min_counts_evt"][w.alterations][c] for c in config["data"]["cohorts"]],

@@ -360,12 +360,12 @@ if (getOption('run.main', default=TRUE)) {
                           "../../../results/combined_alterations/other_plots/barplot_multihits_tumorsuppressors_PAAD.pdf",
                           "../../../results/combined_alterations/other_plots/barplot_multihits_tumorsuppressors_PRAD.pdf"))
   parser$add_argument("--output_papers", type="character", nargs="+", help="Path to where plot is saved.", default=NULL,
-                default=c("../../../results/figures_paper/FS13a.pdf",
-                          "../../../results/figures_paper/FS13b.pdf"
-                          "../../../results/figures_paper/FS13c.pdf"
-                          "../../../results/figures_paper/FS13d.pdf"
-                          "../../../results/figures_paper/FS13e.pdf"
-                          "../../../results/figures_paper/FS13f.pdf"))
+                default=c("../../results/figures_paper/FS9_10_tumorsuppressors_All.pdf",
+                          "../../results/figures_paper/FS9_10_tumorsuppressors_BRCA.pdf"
+                          "../../results/figures_paper/FS9_10_tumorsuppressors_BLCA.pdf"
+                          "../../results/figures_paper/FS9_10_tumorsuppressors_LUAD.pdf"
+                          "../../results/figures_paper/FS9_10_tumorsuppressors_PAAD.pdf"
+                          "../../results/figures_paper/FS9_10_tumorsuppressors_PRAD.pdf"))
   parser$add_argument("-l", "--log", type="character", help="Path where log file will be saved.")
   args <- parser$parse_args()
 

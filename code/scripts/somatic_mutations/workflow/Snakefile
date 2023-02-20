@@ -33,7 +33,7 @@ rule all:
             selection=["non_synonymous", "all"], cohort=["prism", "tcga"]),
         #### FIGURES PAPER ####
         "%s/F2a.svg" % F_FOLDER,
-        "%s/FS12.pdf" % F_FOLDER
+        "%s/FS8.pdf" % F_FOLDER
 
 
 ##### Modules #####

@@ -25,13 +25,13 @@ rule all:
         #### PAPER FIGURES ####
         "%s/F2c.eps" % F_FOLDER,
         "%s/F2d.eps" % F_FOLDER,
-        "%s/FS10_gains.pdf" % F_FOLDER,
-        "%s/FS10_losses.pdf" % F_FOLDER,
-        "%s/FS11a.pdf" % F_FOLDER,
-        "%s/FS11b.pdf" % F_FOLDER,
-        "%s/FS11c.pdf" % F_FOLDER,
-        "%s/FS11d.pdf" % F_FOLDER,
-        "%s/FS11d-e.pdf" % F_FOLDER
+        "%s/FS6_gains.pdf" % F_FOLDER,
+        "%s/FS6_losses.pdf" % F_FOLDER,
+        "%s/FS5a.pdf" % F_FOLDER,
+        "%s/FS5b.pdf" % F_FOLDER,
+        "%s/FS5c.pdf" % F_FOLDER,
+        "%s/FS5d.pdf" % F_FOLDER,
+        "%s/FS5d-e.pdf" % F_FOLDER
 
 ##### Modules #####
 

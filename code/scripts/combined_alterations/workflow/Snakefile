@@ -39,7 +39,7 @@ rule all:
         expand("%s/F3a_{gene_type}.svg" % F_FOLDER, gene_type=["oncogenes", "tumorsuppressors"]),
         expand("%s/F3b.eps" % F_FOLDER),
         expand("%s/F5_{direction}.pdf" % F_FOLDER, direction=["resistance", "sensitivity"]),
-        expand("%s/FS12_13_{gene_type}_{tumor_type}.pdf" % F_FOLDER
+        expand("%s/FS9_10_{gene_type}_{tumor_type}.pdf" % F_FOLDER
             gene_type=["oncogenes", "tumorsuppressors"], tumor_type=["All", "BLCA", "BRCA", "LUAD", "PAAD", "PRAD"]),
 
 ##### Modules #####
