@@ -15,4 +15,4 @@ source activate ${HOME}/miniconda3
 conda install -y -c conda-forge mamba
 
 # create the snakemake master env
-mamba create -n "snakemake" -c conda-forge -c bioconda -c defaults python=3.9.5 snakemake=6.5.1 pandas=1.2.5 -y
+mamba create -n "snakemake" -c conda-forge -c bioconda -c defaults python=3.8 snakemake pandas mamba -y
