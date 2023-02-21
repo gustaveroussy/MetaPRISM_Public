@@ -15,7 +15,7 @@ import os
 import numpy as np
 import pandas as pd
 
-from pyprism.util import setwd_to_results
+from pyprism.util import setwd_to_data
 from ._filepaths import _get_filepath_colors
 
 DataFrame = pd.core.frame.DataFrame
@@ -39,7 +39,7 @@ def load_colors(sheet: str, as_dataframe=False):
     A dict or a data.frame.
 
     """
-    cwd = setwd_to_results()
+    cwd = setwd_to_data()
 
     try:
         df_colors = pd.read_excel(_get_filepath_colors(), sheet_name=sheet, engine="openpyxl", keep_default_na=False)

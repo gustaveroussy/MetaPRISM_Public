@@ -23,12 +23,6 @@ from typing import Iterable
 import sys
 
 from pyprism.data import load_ids
-from pyprism.util import setwd_to_scripts
-
-cwd = setwd_to_scripts()
-sys.path.append("pipeline_cln/workflow/functions")
-from util_ids import get_sample_id_from_rna_gex
-os.chdir(cwd)
 
 from ._filepaths import _get_filepath_rna_gex, _get_filepath_summary_rna_gex
 from ._filepaths import _get_filepath_rna_fus, _get_filepath_summary_rna_fus

@@ -52,7 +52,7 @@ def _get_filepath_res(database, name):
 
 def _get_filepath_colors() -> str:
     FILEPATHS = _get_filepaths()
-    return "data_overview/colors/colors.xlsx"
+    return FILEPATHS["resources"]["colors"]
 
 
 def _get_filepath_wes_mut(study, mode):

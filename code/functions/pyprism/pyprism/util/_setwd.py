@@ -23,7 +23,7 @@ The following functions are implemented
 import os
 
 # Name of the project root folder. Modify if you've cloned the git repository under a different name
-PROJECT_FOLDER = "MetaPRISM"
+PROJECT_FOLDER = "MetaPRISM_Public"
 
 def setwd_to_data():
     current_wd = os.getcwd()
@@ -53,5 +53,5 @@ def setwd_to_scripts():
     else:
         while not os.getcwd().endswith(PROJECT_FOLDER):
             os.chdir("..")
-        os.chdir("./scripts/")
+        os.chdir("./code/scripts/")
     return current_wd

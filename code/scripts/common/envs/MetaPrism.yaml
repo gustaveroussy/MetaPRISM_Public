@@ -9,10 +9,6 @@ channels:
   - defaults
   - r
 dependencies:
-  - bioconductor-complexheatmap=2.10.0
-  - bioconductor-gseabase=1.56.0
-  - bioconductor-gsva=1.42.0
-  - bioconductor-maftools=2.10.0
   - bokeh=2.4.3
   - r-argparse=2.1.1
   - r-assertthat=0.2.1

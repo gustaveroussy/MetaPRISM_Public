@@ -19,7 +19,7 @@
 #     setwd_to_scripts()
 
 # Name of the project root folder_ Modify if you've cloned the git repository under a different name
-PROJECT_FOLDER <- "MetaPRISM"
+PROJECT_FOLDER <- "MetaPRISM_Public"
 
 #' Set the working directory to the data folder of the project.
 #'
@@ -57,24 +57,6 @@ setwd_to_results <- function(){
   return(current_wd)
 }
 
-#' Set the working directory to the logs folder of the project.
-#'
-#' @return current_wd name of the working directory before change
-#' @author Yoann Pradat
-#' @export
-setwd_to_logs <- function(){
-  current_wd <- getwd()
-  if (!grepl(PROJECT_FOLDER, getwd())){
-    stop(paste("Please set the working directory to a location in the repository", PROJECT_FOLDER))
-  } else {
-    while (!endsWith(getwd(), PROJECT_FOLDER)){
-      setwd("..")
-    }
-  }
-  setwd("./logs")
-  return(current_wd)
-}
-
 #' Set the working directory to the scripts folder of the project.
 #'
 #' @return current_wd name of the working directory before change
@@ -89,6 +71,6 @@ setwd_to_scripts <- function(){
       setwd("..")
     }
   }
-  setwd("./scripts")
+  setwd("./code/scripts")
   return(current_wd)
 }
