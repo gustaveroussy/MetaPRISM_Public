@@ -39,13 +39,12 @@ def load_colors(sheet: str, as_dataframe=False):
     A dict or a data.frame.
 
     """
-    cwd = setwd_to_data()
-
     try:
-        df_colors = pd.read_excel(_get_filepath_colors(), sheet_name=sheet, engine="openpyxl", keep_default_na=False)
+        filepath = _get_filepath_colors()
+        cwd = setwd_to_data()
+        df_colors = pd.read_excel(filepath, sheet_name=sheet, engine="openpyxl", keep_default_na=False)
         os.chdir(cwd)
     except Exception as e:
-        os.chdir(cwd)
         raise e
 
     if as_dataframe:
