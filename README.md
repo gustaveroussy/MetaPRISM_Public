@@ -24,6 +24,15 @@ of essential clinical characteristics.
 Lead author and maintainer of the repository.
 - Yoann Pradat <https://github.com/ypradat>
 
+Other contributors
+- [Thibault Dayris](https://github.com/tdayris)
+- [Marc Deloger](https://github.com/mdeloger)
+- [Daniel Gautheret](https://github.com/dgautheret)
+- Konstantin Gunbin
+- [Antoine Lainé](https://github.com/aLaine1)
+- [Ismael Padioleau](https://github.com/ipadiole)
+- Andrey Yurchenko
+
 # References
 
 [Pradat et al. Integrative pan-cancer genomic and transcriptomic analyses of refractory metastatic cancer. Cancer
