@@ -23,3 +23,8 @@ of essential clinical characteristics.
 
 Lead author and maintainer of the repository.
 - Yoann Pradat <https://github.com/ypradat>
+
+# References
+
+[Pradat et al. Integrative pan-cancer genomic and transcriptomic analyses of refractory metastatic cancer. Cancer
+Discovery. 2023](https://aacrjournals.org/cancerdiscovery/article/doi/10.1158/2159-8290.CD-22-0966/718563/Integrative-pan-cancer-genomic-and-transcriptomic)
