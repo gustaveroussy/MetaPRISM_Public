@@ -21,9 +21,9 @@ import numpy as np
 import pandas as pd
 import re
 import sys
-sys.path.append("../pipeline_cln/workflow/functions")
+sys.path.append("workflow/functions")
 
-from util_curate import merge_on_rows
+from utils import merge_on_rows
 
 # functions ============================================================================================================
 
